@@ -21,6 +21,7 @@ data_preprocessing <- drake_plan(
   species_info_OK = test_species_info(species_info),
   sampling_info = get_sampling_info(fish_data_raw),
   sampling_info_OK = test_sampling_info(sampling_info),
+  site_info = get_site_info(fish_data_raw)
 
 )
 

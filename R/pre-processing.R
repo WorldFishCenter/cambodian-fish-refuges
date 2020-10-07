@@ -18,15 +18,12 @@ get_sampling_info <- function(fish_data_raw){
     dplyr::mutate_at(dplyr::vars("illegal_fishing",
                                  "water_bird",
                                  "other_animal"), ~ !. == "no")
-
 }
 
 
 test_sampling_info <- function(sampling_info){
   multiple_rows_per_sampling <- sampling_info %>%
-    dplyr::count(sampling) %$%
-    magrittr::is_greater_than(n, 1) %>%
-    any()
+    has_single_row(sampling)
 
   if (multiple_rows_per_sampling)
     stop("Multiple rows per sampling in sammpling_info table")
@@ -34,7 +31,19 @@ test_sampling_info <- function(sampling_info){
 
 
 get_site_info <- function(fish_data_raw){
+  fish_data_raw %>%
+    dplyr::select(cfr_name, cfr_id, village, commune, district, province,
+                  agro_eco_zone, fi_a_designated, category, category_1) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(refuge = make_id(cfr_id, "fr"))
+}
 
+test_site_info <- function(site_info){
+  site_info %>%
+    has_single_row(sampling)
+
+  if (multiple_rows_per_sampling)
+    stop("Multiple rows per sampling in sammpling_info table")
 }
 
 # make an id based on a prefix and a number
