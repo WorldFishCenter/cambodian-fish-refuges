@@ -20,6 +20,7 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Renviron
+.drake/*
 
 ## OS X
 .DS_Store
