@@ -3,8 +3,8 @@ services:
   r:
     build: .
     ports:
-      - "8787:8787"
+      - "8790:8787"
     volumes:
-      - .:/home/rstudio/workspace
+      - .:/home/rstudio/cambodian-fish-refuges
     environment:
       DISABLE_AUTH: "true"
