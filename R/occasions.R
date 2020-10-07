@@ -9,9 +9,6 @@ get_ocassion_info <- function(fish_data_raw){
     dplyr::mutate(month = lubridate::month(sampling_start, label = T),
                   year = lubridate::year(sampling_start)) %>%
     # Nice occasion id
-    dplyr::mutate(occasion = paste0("oc", stringr::str_pad(
-      string = occasion,
-      width = floor(log10(max(occasion))) + 1,
-      pad = "0")))
+    dplyr::mutate(occasion = make_id(occasion, "oc"))
 }
 

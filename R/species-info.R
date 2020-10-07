@@ -15,10 +15,7 @@ get_species_info <- function(fish_data_raw, species_to_exclude){
     dplyr::select(species_name, species_code, family, genus, group, type) %>%
     dplyr::distinct() %>%
     # nice species id
-    dplyr::mutate(species = paste0("sp", stringr::str_pad(
-      string = species_code,
-      width = floor(log10(max(species_code))) + 1,
-      pad = "0")))
+    dplyr::mutate(species = make_id(species_code, "sp"))
 }
 
 # Test that the species info frame is fine

@@ -1,3 +1,4 @@
+# get clean information about the sampling ocassions
 get_sampling_info <- function(fish_data_raw){
   fish_data_raw %>%
     dplyr::select(no, date, total_hours, gauge_start, gauge_finish,
@@ -8,11 +9,7 @@ get_sampling_info <- function(fish_data_raw){
     dplyr::rename(water_temp = water_tem,
                   illegal_fishing = illegal_fishing_seen) %>%
     dplyr::distinct() %>%
-    dplyr::mutate(sampling =
-                    paste0("sa",
-                           stringr::str_pad(string = no,
-                                            width = floor(log10(max(no))) + 1,
-                                            pad = "0"))) %>%
+    dplyr::mutate(sampling = make_id(no, "sa")) %>%
     dplyr::mutate(date = as.Date(date, origin = "1899-12-30")) %>%
     dplyr::mutate_at(dplyr::vars("illegal_fishing",
                                  "water_bird",
@@ -38,4 +35,13 @@ test_sampling_info <- function(sampling_info){
 
 get_site_info <- function(fish_data_raw){
 
+}
+
+# make an id based on a prefix and a number
+make_id <- function(x, prefix){
+  stopifnot(is.numeric(x))
+  paste0(prefix,
+         stringr::str_pad(string = x,
+                          width = floor(log10(max(x))) + 1,
+                          pad = "0"))
 }
