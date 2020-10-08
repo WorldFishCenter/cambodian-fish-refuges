@@ -2,7 +2,8 @@
 get_sampling_info <- function(community_data){
   community_data %>%
     dplyr::select(refuge, occasion, replicate, gear, sampling, gear_name,
-                  net_length, net_area, depth_shore, depth_end) %>%
+                  net_length, net_area, depth_shore, depth_end, time_in,
+                  duration) %>%
     dplyr::distinct()
 }
 

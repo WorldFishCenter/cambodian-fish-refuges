@@ -53,6 +53,10 @@ clean_community_data <- function(community_data_raw, species_to_exclude){
     # Species names
     dplyr::mutate(species_name = snakecase::to_sentence_case(species_name)) %>%
     dplyr::filter(!stringr::str_detect(species_name, species_to_exclude)) %>%
+    # Group species with the same name into one
+    dplyr::group_by(species_name) %>%
+    dplyr::mutate(species_code = min(species_code)) %>%
+    dplyr::ungroup() %>%
     # Make id columns better
     dplyr::mutate(refuge = make_id(refuge, "fr")) %>%
     dplyr::mutate(occasion = make_id(occasion, "oc")) %>%
@@ -62,4 +66,3 @@ clean_community_data <- function(community_data_raw, species_to_exclude){
     dplyr::mutate(sampling = paste(refuge, occasion, replicate,
                                    gear, sep = "_"))
 }
-

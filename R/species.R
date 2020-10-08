@@ -3,7 +3,8 @@ get_species_info <- function(fish_data_raw, species_to_exclude){
 
 
   fish_data_raw %>%
-    dplyr::select(species_name, species_code, family, genus, group, type) %>%
+    dplyr::select(species_name, species_code, family, genus,
+                  group, type, species) %>%
     dplyr::distinct()
 
 }

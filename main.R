@@ -25,10 +25,7 @@ data_preprocessing <- drake_plan(
   sampling_info = get_sampling_info(community_data),
   species_info = get_species_info(community_data),
   species_info_OK = test_species_info(species_info),
-
-  #
-  # record_info = get_records(fish_data_raw)
-
+  catch_info = get_catch_info(community_data)
 )
 
 full_plan <- rbind(script_variables,
