@@ -14,4 +14,3 @@ has_single_row <- function(df, column_name){
     magrittr::is_greater_than(n, 1) %>%
     any()
 }
-ß
