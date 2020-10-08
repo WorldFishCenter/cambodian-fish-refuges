@@ -14,3 +14,10 @@ has_single_row <- function(df, column_name){
     magrittr::is_greater_than(n, 1) %>%
     any()
 }
+
+# Fix UTF encoding of weird characters
+fix_encoding <- function(x){
+  x %>%
+    `Encoding<-`("latin1") %>%
+    utf8::utf8_normalize(., remove_ignorable = T)
+}

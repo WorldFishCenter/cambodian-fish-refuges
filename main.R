@@ -11,17 +11,23 @@ f <- lapply(list.files(path = here::here("R"), full.names = TRUE,
 
 script_variables <- drake_plan(
   species_to_exclude = c("Unname"),
-  fish_data_path = file_in("data-raw/cambodia.csv")
+  community_data_path = file_in("data-raw/cambodia.csv")
 )
 
 data_preprocessing <- drake_plan(
-  fish_data_raw = clean_fish_data(fish_data_path),
-  occasion_info = get_ocassion_info(fish_data_raw),
-  species_info = get_species_info(fish_data_raw, species_to_exclude),
+  community_data_raw = readr::read_csv(file = community_data_path,
+                                  na = c("", "NA", "#VALUE!")),
+  community_data = clean_community_data(community_data_raw, species_to_exclude),
+  refuge_info = get_refuge_info(community_data),
+  refuge_info_OK = test_refuge_info(refuge_info),
+  occasion_info = get_occasion_info(community_data),
+  occasion_info_OK = test_occasion_info(occasion_info),
+  sampling_info = get_sampling_info(community_data),
+  species_info = get_species_info(community_data),
   species_info_OK = test_species_info(species_info),
-  sampling_info = get_sampling_info(fish_data_raw),
-  sampling_info_OK = test_sampling_info(sampling_info),
-  site_info = get_site_info(fish_data_raw)
+
+  #
+  # record_info = get_records(fish_data_raw)
 
 )
 
