@@ -1,0 +1,65 @@
+---
+title: "Sampling bias"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  fig.width = 9, fig.height = 6)
+library(ggplot2)
+library(magrittr)
+```
+
+The first step on the analysis is a better understanding of the data. 
+We're particularly interested on knowing whether we should include data from all gears and whether there are particular considerations when analysing one gear or another.
+
+We start by loading the catch data:
+
+```{r}
+drake::loadd(catch_info)
+```
+
+First, we want to have a rough intuition about how big is the bias that each gear has on species. 
+For that, we plot the number of times a species was sampled using a particular gear. 
+The colour of the tiles in the following plot show just that. 
+Species are ordered by the number of samples. 
+
+```{r}
+catch_info %>%
+  dplyr::count(species, gear, .drop = F) %>% 
+  tidyr::complete(species, gear, fill = list(n = 0)) %>% 
+  dplyr::ungroup() %>%
+  dplyr::mutate_at(vars(gear, species), ~ forcats::fct_reorder(., n, .fun = sum, .desc = T)) %>%
+  dplyr::mutate(group = cut(as.numeric(species), 7)) %>% 
+  ggplot() +
+  geom_tile(aes(y = species, x = gear, fill = log(n))) +
+  facet_wrap("group",nrow = 1, scales = "free_y") +
+  theme(legend.position = "bottom", strip.text = element_blank()) +
+  labs(fill = "(log) number of samplings")
+```
+
+We can see that most species were captured at least once by the gill net (GN). 
+Only a handful of species were captured by fike traps (FN) or hook lines (HL) alone. 
+
+A second consideration is
+
+```{r, fig.height=10}
+# Helper function to order factors in plot
+n_zeros <- function(x){sum(x == 0)}
+catch_info %>%
+  dplyr::count(refuge, occasion, replicate, gear) %>%
+  tidyr::complete(refuge, occasion, replicate, gear, fill = list(n = 0)) %>%
+  dplyr::mutate_at(vars(refuge, gear), ~ forcats::fct_reorder(., n, .fun = n_zeros, .desc = F)) %>%
+  ggplot() +
+  geom_tile(aes(y = refuge, x = replicate, fill = log(n))) +
+  facet_grid(gear ~ occasion) +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 90)) +
+  labs(fill = "(log) number of species")
+```
+
+
+## Take aways
+
+* Analyse only gill net data
+* 
