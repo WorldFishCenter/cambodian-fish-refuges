@@ -28,8 +28,13 @@ data_preprocessing <- drake_plan(
   catch_info = get_catch_info(community_data)
 )
 
+notebooks_plan <- drake_plan(
+  sampling_bias_nb = target(rmarkdown::render(knitr_in("notebooks/sampling-bias.Rmd")))
+)
+
 full_plan <- rbind(script_variables,
-                   data_preprocessing)
+                   data_preprocessing,
+                   notebooks_plan)
 
 # Execute plan ------------------------------------------------------------
 
