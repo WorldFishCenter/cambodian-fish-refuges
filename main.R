@@ -29,7 +29,8 @@ data_preprocessing <- drake_plan(
 )
 
 notebooks_plan <- drake_plan(
-  sampling_bias_nb = target(rmarkdown::render(knitr_in("notebooks/sampling-bias.Rmd")))
+  sampling_bias_nb = target(rmarkdown::render(knitr_in("notebooks/sampling-bias.Rmd"))),
+  catch_comp_nb = target(rmarkdown::render(knitr_in("notebooks/catch-composition.Rmd")))
 )
 
 full_plan <- rbind(script_variables,
