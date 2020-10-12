@@ -11,7 +11,8 @@ f <- lapply(list.files(path = here::here("R"), full.names = TRUE,
 
 script_variables <- drake_plan(
   species_to_exclude = c("Unname"),
-  community_data_path = file_in("data-raw/cambodia.csv")
+  community_data_path = file_in("data-raw/cambodia.csv"),
+  n_fish_types = 3,
 )
 
 data_preprocessing <- drake_plan(
@@ -23,9 +24,9 @@ data_preprocessing <- drake_plan(
   occasion_info = get_occasion_info(community_data),
   occasion_info_OK = test_occasion_info(occasion_info),
   sampling_info = get_sampling_info(community_data),
-  species_info = get_species_info(community_data),
+  species_info = get_species_info(community_data, n_fish_types),
   species_info_OK = test_species_info(species_info),
-  catch_info = get_catch_info(community_data)
+  catch_info = get_catch_info(community_data),
 )
 
 notebooks_plan <- drake_plan(
