@@ -1,0 +1,81 @@
+---
+title: "Analysis plan"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document lists a series of analysis that could be performed for the project manuscript. These analysis are roughly analysis with the aims of the project while acknowledging known data limitations. 
+
+These analysis are based on data exploration investigating the [sampling bias](sampling-bias.md), and the [catch composition](catch-composition.md).
+
+## Species (types) importance
+
+*Question: What species (and species-types) are the most important over time in community refuges in Cambodian Rice fisheries?*
+
+- Calculate IRI per refuge, per species, per occasion 
+- Construct a multinomial of % IRL per species type. Time of the year is included as a fixed effect. Species and refuge are included as random effects. 
+
+**Analysis outputs:**
+
+- Figure with mean IRI of species types over the year
+- Table of average species importance (as per IRI) in the Supplementary Information
+- Table with model summaries in the Supplementary Information
+
+**Outstanding questions:**
+
+- Does calculating the IRI per refuge/species/occasion vs species/occasions could dramatically affect the results?
+- Should this analysis be simplified to calculate IRI across refuges? This is one IRI per species, per occasion only. This will allow for simpler visualisation of the results as %IRI could be included but we won't learn much about inter-site variation. 
+- Does this analysis overlaps with biodiversity analysis below? It might tell a similar story and using more analysis than needed might complicate the story.
+
+**Analysis time:** 3-6 days
+
+## Biodiversity patterns
+
+*What are the differences in biodiversity among sites and across time. What refuge factors influence this diversity?*
+
+- Calculate Shannon's alpha diversity and evenness per refuge, species, occasion (using base *e* and Hill's ratio). 
+- Calculate Simpson's alpha diversity and evenness per refuge, species, occasion (using base 2 and Hill's ratio again). 
+- Further analysis will be performed using Shannon's diversity indices as it's slightly more common (and is the one used in PASGEAR). We'll have Simpson indices ready in case reviewer's ask for a sensitivity analysis. 
+- Construct two models one for diversity and one for evenness. In both models include spatial and temporal factors as covariates. As fixed effects: community category, time of the year (and the interaction with community category). As random effects refuge id, year, and sampling effort. 
+
+**Analysis outputs:**
+
+- R2 values for both models
+- Graph of conditional responses for each fixed effects variable (or most interesting)
+- Table with models summaries in the Supplementary Information
+
+**Outstanding questions:**
+
+- What are the most important refuge co-variates would be important to add in the model? Those that could be viewed as refuge interventions could be particularly interesting.
+- What sampling covariates could be important when modelling the species diversity? Those that are not easily explained by the time of the year/occasions could be particularly interesting. 
+- Note that we are already using a fair number of degrees of freedom and including more than 4 extra factors (degrees of freedom) might be infeasible. 
+
+**Analysis time:** 4-8 days
+
+## Community composition
+
+*How does community composition changes across time and space (beta diversity measured by Chi2 distances)?* 
+*Possible extension: Is community composition driven by site characteristics?*
+
+- Correspondence analysis (akin to PCA) of abundance matrix (species/refuges+occasions)
+- Visual representation of first axis to explore/identify patterns across time of the year and refuge type.
+- Concordance analysis to examine whether grouping by time of the year and refuge type is a "significant" way to cluster communities
+- *Possible extension step*: Canonical correspondence analysis to constrain the ordination. This would answer answers to the additional question of whether composition is driven by site/occasion characteristics. We could include a large number of predictors but the larger the number the more complicated the analysis and interpretation.
+- *Possible extension step*: Permutation tests to determine the significance of associations between composition and predictors. 
+- *Possible extension step*: Variation partition analysis to determine the relative importance of predictors.
+
+**Analysis outputs:**
+
+- Biplot of communities in principal axis space. 
+- *Possible extension*: Triplot of communities and predictors in principal axis space
+- *Possible extension*: Model outputs in supplementary information
+
+**Outstanding questions:**
+
+- Similar as in previous analysis it would be possible to include community info from individual replicates separately or jointly. The full implications of either options are unknown.
+- It is possible that the response of species abundance to site/occasion characteristics is not unimodal. In this case we cannot use the results of the canonical correspondence analysis in the paper, but we won't know until we try it. 
+
+**Analysis time:** 3-6 days (7-11 days with possible extension)
