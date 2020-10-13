@@ -1,0 +1,44 @@
+---
+title: "Seasonality"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7)
+library(ggplot2)
+library(magrittr)
+```
+
+```{r}
+drake::loadd(occasion_info)
+```
+
+```{r}
+boxplot_occasion <- function(var){
+  occasion_info %>%
+    dplyr::select(-sampling) %>%
+    dplyr::distinct() %>%
+    ggplot(aes_string(x = "occasion", y = var))  +
+    geom_boxplot() +
+    geom_point(shape = 21)
+}
+```
+
+```{r}
+occasion_info %>%
+  dplyr::select(-sampling) %>%
+  dplyr::distinct() %>%
+  ggplot(aes(x = occasion, y = secchi_depth))  +
+  geom_boxplot() +
+  geom_point(aes( colour = refuge))
+```
+
+```{r}
+occasion_info %>%
+  dplyr::select(-sampling) %>%
+  dplyr::distinct() %>%
+  ggplot(aes(x = occasion, y = aquatic_plant_density))  +
+  geom_boxplot() +
+  geom_point(aes( colour = refuge))
+```
+
