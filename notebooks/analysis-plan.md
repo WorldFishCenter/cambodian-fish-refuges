@@ -68,6 +68,11 @@ What refuge factors influence this diversity?*
 
 **Outstanding questions:**
 
+  - Note that there is a lage overlap between this analysis and Fiorella
+    et al. study. Included here because I saw there still an interest of
+    “investigating Shannon H by sites and by gear type”. However need to
+    be mindful that effort was standardised and gear comparisons would
+    be limited to overlapping times.
   - What are the most important refuge co-variates would be important to
     add in the model? Those that could be viewed as refuge interventions
     could be particularly interesting.
@@ -80,14 +85,15 @@ What refuge factors influence this diversity?*
 
 **Analysis time:** 4-8 days
 
-## Community composition
+## Community composition (first level beta diversity)
 
 *How does community composition changes across time and space (beta
 diversity measured by Chi2 distances)?* *Possible extension: Is
 community composition driven by site characteristics?*
 
   - Correspondence analysis (akin to PCA) of abundance matrix
-    (species/refuges+occasions)
+    (species/refuges+occasions). Uses Chi-square distances of
+    beta-diversity.
   - Visual representation of first axis to explore/identify patterns
     across time of the year and refuge type.
   - Concordance analysis to examine whether grouping by time of the year
@@ -121,3 +127,34 @@ community composition driven by site characteristics?*
     the paper, but we won’t know until we try it.
 
 **Analysis time:** 3-6 days (7-11 days with possible extension)
+
+## Temporal beta-diversity index
+
+*How similar is the composition between t1 and t2 within a community?
+Has composition changed in exceptional ways? Is it due to mostly species
+gains or losses?*
+
+This Temporal beta-diersity index TBI has been recently developed by
+[Legendre
+(2018)](https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.4984)
+Ecology and Evolution
+
+  - Compute TBI
+  - Compute signigficancy of differences
+  - Identify species that drive significant changes
+  - Compute species gains and losses by % denominator
+
+**Analysis outputs:**
+
+  - Plot of changes in dissimilarity (total and partitioned across gains
+    and losses) across the chosen comparison points in time for each
+    site.
+  - Possibly plot of gain/losses across sites and comparison periods
+
+**Outstanding questions:**
+
+  - Complex analysis as we have more than one time and it’s not clear
+    what comparisons would me more relevant. Should we focus comparison
+    between along years for a single time of the year? Should we focus
+    comparison between seasons and use years as replicates? Should we
+    focus in an start/end of the time series?

@@ -49,18 +49,19 @@ These analysis are based on data exploration investigating the [sampling bias](s
 
 **Outstanding questions:**
 
+- Note that there is a lage overlap between this analysis and Fiorella et al. study. Included here because I saw there still an interest of "investigating Shannon H by sites and by gear type". However need to be mindful that effort was standardised and gear comparisons would be limited to overlapping times.
 - What are the most important refuge co-variates would be important to add in the model? Those that could be viewed as refuge interventions could be particularly interesting.
 - What sampling covariates could be important when modelling the species diversity? Those that are not easily explained by the time of the year/occasions could be particularly interesting. 
 - Note that we are already using a fair number of degrees of freedom and including more than 4 extra factors (degrees of freedom) might be infeasible. 
 
 **Analysis time:** 4-8 days
 
-## Community composition
+## Community composition (first level beta diversity)
 
 *How does community composition changes across time and space (beta diversity measured by Chi2 distances)?* 
 *Possible extension: Is community composition driven by site characteristics?*
 
-- Correspondence analysis (akin to PCA) of abundance matrix (species/refuges+occasions)
+- Correspondence analysis (akin to PCA) of abundance matrix (species/refuges+occasions). Uses Chi-square distances of beta-diversity.
 - Visual representation of first axis to explore/identify patterns across time of the year and refuge type.
 - Concordance analysis to examine whether grouping by time of the year and refuge type is a "significant" way to cluster communities
 - *Possible extension step*: Canonical correspondence analysis to constrain the ordination. This would answer answers to the additional question of whether composition is driven by site/occasion characteristics. We could include a large number of predictors but the larger the number the more complicated the analysis and interpretation.
@@ -79,3 +80,25 @@ These analysis are based on data exploration investigating the [sampling bias](s
 - It is possible that the response of species abundance to site/occasion characteristics is not unimodal. In this case we cannot use the results of the canonical correspondence analysis in the paper, but we won't know until we try it. 
 
 **Analysis time:** 3-6 days (7-11 days with possible extension)
+
+## Temporal beta-diversity index
+
+*How similar is the composition between t1 and t2 within a community? Has composition changed in exceptional ways? Is it due to mostly species gains or losses?*
+
+This Temporal beta-diersity index TBI has been recently developed by [Legendre (2018)](https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.4984) Ecology and Evolution
+
+- Compute TBI
+- Compute signigficancy of differences
+- Identify species that drive significant changes
+- Compute species gains and losses by % denominator
+
+**Analysis outputs:**
+
+- Plot of changes in dissimilarity (total and partitioned across gains and losses) across the chosen comparison points in time for each site. 
+- Possibly plot of gain/losses across sites and comparison periods
+
+**Outstanding questions:** 
+
+- Complex analysis as we have more than one time and it's not clear what comparisons would me more relevant. Should we focus comparison between along years for a single time of the year? Should we focus comparison between seasons and use years as replicates? Should we focus in an start/end of the time series?
+
+**Analysis time:** 3-6 days
