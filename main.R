@@ -33,6 +33,7 @@ notebooks_plan <- drake_plan(
   sampling_bias_nb = target(rmarkdown::render(knitr_in("notebooks/sampling-bias.Rmd"))),
   catch_comp_nb = target(rmarkdown::render(knitr_in("notebooks/catch-composition.Rmd"))),
   seasonality_nb = target(rmarkdown::render(knitr_in("notebooks/seasonality.Rmd"))),
+  readme = target(rmarkdown::render(knitr_in("README.Rmd"))),
 )
 
 full_plan <- rbind(script_variables,
