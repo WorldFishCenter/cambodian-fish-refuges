@@ -37,3 +37,4 @@ dry season to guide development, conservation and fisheries strategy.
 **Analysis**
 
   - [Tentative analysis plan](notebooks/analysis-plan.md)
+  - [Correspondence analysis](notebooks/correspondence-analysis.md)

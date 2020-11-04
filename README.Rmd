@@ -24,3 +24,4 @@ Inland fisheries of the southern Mekong basin are some of the largest in the wor
 **Analysis**
 
 * [Tentative analysis plan](notebooks/analysis-plan.md)
+* [Correspondence analysis](notebooks/correspondence-analysis.md)
