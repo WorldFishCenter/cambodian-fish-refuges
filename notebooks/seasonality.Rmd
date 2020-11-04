@@ -3,7 +3,7 @@ title: "Seasonality"
 output: github_document
 ---
 
-Here we explore the seasonality of 
+Here we explore the seasonality of the sampling. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7)
@@ -77,6 +77,5 @@ pca_analysis <- occasion_info %>%
   FactoMineR::PCA(quali.sup = 14:17, quanti.sup = 18:23, graph = F)
 
 factoextra::fviz_pca_ind(pca_analysis, habillage = "category_name", addEllipses = T)
-
 ```
 

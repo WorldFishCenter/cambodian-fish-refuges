@@ -1,7 +1,7 @@
 Seasonality
 ================
 
-Here we explore the seasonality of
+Here we explore the seasonality of the sampling.
 
 ``` r
 drake::loadd(occasion_info)
