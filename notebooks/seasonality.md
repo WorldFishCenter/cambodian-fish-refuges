@@ -12,7 +12,7 @@ drake::loadd(refuge_info)
 # Function to plot a numeric variable
 boxplot_occasion <- function(var){
   occasion_info %>%
-    dplyr::select(-sampling) %>%
+    dplyr::select(-sampling) %>% 
     dplyr::distinct() %>%
     ggplot(aes_string(x = "occasion", y = var))  +
     geom_boxplot() +
@@ -21,7 +21,7 @@ boxplot_occasion <- function(var){
          title = snakecase::to_sentence_case(var))
 }
 # Loop over the numeric variables
-vars <- colnames(occasion_info)[8:16]
+vars <- colnames(occasion_info)[5:16]
 purrr::map(vars, boxplot_occasion)
 ```
 
@@ -31,10 +31,6 @@ purrr::map(vars, boxplot_occasion)
 
     ## 
     ## [[2]]
-
-    ## Warning: Removed 7 rows containing non-finite values (stat_boxplot).
-
-    ## Warning: Removed 7 rows containing missing values (geom_point).
 
 ![](seasonality_files/figure-gfm/season-boxplots-2.png)<!-- -->
 
@@ -51,6 +47,10 @@ purrr::map(vars, boxplot_occasion)
     ## 
     ## [[5]]
 
+    ## Warning: Removed 7 rows containing non-finite values (stat_boxplot).
+
+    ## Warning: Removed 7 rows containing missing values (geom_point).
+
 ![](seasonality_files/figure-gfm/season-boxplots-5.png)<!-- -->
 
     ## 
@@ -66,16 +66,31 @@ purrr::map(vars, boxplot_occasion)
     ## 
     ## [[8]]
 
-    ## Warning: Removed 1 rows containing non-finite values (stat_boxplot).
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
-
 ![](seasonality_files/figure-gfm/season-boxplots-8.png)<!-- -->
 
     ## 
     ## [[9]]
 
 ![](seasonality_files/figure-gfm/season-boxplots-9.png)<!-- -->
+
+    ## 
+    ## [[10]]
+
+![](seasonality_files/figure-gfm/season-boxplots-10.png)<!-- -->
+
+    ## 
+    ## [[11]]
+
+    ## Warning: Removed 1 rows containing non-finite values (stat_boxplot).
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+![](seasonality_files/figure-gfm/season-boxplots-11.png)<!-- -->
+
+    ## 
+    ## [[12]]
+
+![](seasonality_files/figure-gfm/season-boxplots-12.png)<!-- -->
 
 Let’s have a closer look at the water level. But this time in
 logarithmic scale because there is a large variability on the rice field

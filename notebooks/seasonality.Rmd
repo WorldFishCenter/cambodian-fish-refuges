@@ -29,7 +29,7 @@ boxplot_occasion <- function(var){
          title = snakecase::to_sentence_case(var))
 }
 # Loop over the numeric variables
-vars <- colnames(occasion_info)[8:16]
+vars <- colnames(occasion_info)[5:16]
 purrr::map(vars, boxplot_occasion)
 ```
 
