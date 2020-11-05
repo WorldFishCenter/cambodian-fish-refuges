@@ -6,6 +6,8 @@ get_occasion_info <- function(community_data){
                   phosphate, nitrogen, conductivity, aquatic_plant_area,
                   aquatic_plant_density, brush_park, illegal_fishing,
                   water_bird, other_animal, weather)  %>%
+    dplyr::mutate(aquatic_plant_density = dplyr::if_else(
+      aquatic_plant_density > 100, 100, aquatic_plant_density)) %>%
     dplyr::distinct()
 
 }
