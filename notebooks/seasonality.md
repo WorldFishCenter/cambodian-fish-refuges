@@ -12,7 +12,7 @@ drake::loadd(refuge_info)
 # Function to plot a numeric variable
 boxplot_occasion <- function(var){
   occasion_info %>%
-    dplyr::select(-sampling) %>% 
+    dplyr::select(-sampling) %>%
     dplyr::distinct() %>%
     ggplot(aes_string(x = "occasion", y = var))  +
     geom_boxplot() +
@@ -155,3 +155,83 @@ factoextra::fviz_pca_ind(pca_analysis, habillage = "category_name", addEllipses 
 ```
 
 ![](seasonality_files/figure-gfm/pca-water-level-1.png)<!-- -->
+
+## Seasonality coovariates
+
+Now we explore what characterises each sampling occasion to better
+understand that.
+
+We can decompose the seasonality variables into several axis.
+
+The firs axis is related to water level: gauge start, gauge finish,
+secci depth, and rice field water deptth are highly correlated. This
+shows a clear but still muddy separation across months, and seasons.
+
+The second group is related to nutrients: aquatic plant area, aquatic
+plant density, conductivity and phosphate point in the same direction.
+Interestingly, it is negatively correlated to nitrogen (albeit not by
+much).
+
+The third component is related to more brush park and less water
+temperature. Second and third dimension tend to be more related to year.
+It appears that, brush park increased across years while temperature
+decreased. Patterns are not very clear but it shows that including these
+variables as main effects might not account for the whole variablity.
+
+``` r
+season_pca <- occasion_info %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date), 
+         season = if_else(month %in% c(2,5), "dry", "wet"), 
+         across(c("month", "year"), as.character)) %>%
+  select(occasion, year, month, season, everything(), -sampling, -weather, -date, - refuge, -illegal_fishing, -water_bird, -other_animal, -total_hours) %>% 
+  distinct() %>%
+  # mutate(across(c(illegal_fishing, water_bird, other_animal), as.numeric)) %>%
+  FactoMineR::PCA(quali.sup = 1:4)
+```
+
+    ## Warning in FactoMineR::PCA(., quali.sup = 1:4): Missing values are imputed by
+    ## the mean of the variable: you should use the imputePCA function of the missMDA
+    ## package
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->![](seasonality_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_var(season_pca)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_var(season_pca, axes = 3:4)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-4.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "season", addEllipses = T)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-5.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "month", addEllipses = T)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-6.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "occasion", addEllipses = T, axes = 3:4)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-7.png)<!-- -->
+
+``` r
+factoextra::fviz_pca_ind(season_pca, geom = "", habillage = "year", addEllipses = T, axes = 3:4)
+```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-2-8.png)<!-- -->
+
+``` r
+# FactoInvestigate::Investigate(season_pca)
+```

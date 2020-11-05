@@ -9,6 +9,7 @@ Here we explore the seasonality of the sampling.
 knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7)
 library(ggplot2)
 library(magrittr)
+library(tidyverse)
 ```
 
 ```{r}
@@ -77,5 +78,37 @@ pca_analysis <- occasion_info %>%
   FactoMineR::PCA(quali.sup = 14:17, quanti.sup = 18:23, graph = F)
 
 factoextra::fviz_pca_ind(pca_analysis, habillage = "category_name", addEllipses = T)
+```
+
+## Seasonality coovariates
+
+Now we explore what characterises each sampling occasion to better understand that. 
+
+We can decompose the seasonality variables into several axis. 
+
+The firs axis is related to water level: gauge start, gauge finish, secci depth, and rice field water deptth are highly correlated. This shows a clear but still muddy separation across months, and seasons. 
+
+The second group is related to nutrients: aquatic plant area, aquatic plant density, conductivity and phosphate point in the same direction. Interestingly, it is negatively correlated to nitrogen (albeit not by much).
+
+The third component is related to more brush park and less water temperature. Second and third dimension tend to be more related to year. It appears that, brush park increased across years while temperature decreased. Patterns are not very clear but it shows that including these variables as main effects might not account for the whole variablity. 
+
+```{r}
+season_pca <- occasion_info %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date), 
+         season = if_else(month %in% c(2,5), "dry", "wet"), 
+         across(c("month", "year"), as.character)) %>%
+  select(occasion, year, month, season, everything(), -sampling, -weather, -date, - refuge, -illegal_fishing, -water_bird, -other_animal, -total_hours) %>% 
+  distinct() %>%
+  # mutate(across(c(illegal_fishing, water_bird, other_animal), as.numeric)) %>%
+  FactoMineR::PCA(quali.sup = 1:4)
+
+factoextra::fviz_pca_var(season_pca)
+factoextra::fviz_pca_var(season_pca, axes = 3:4)
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "season", addEllipses = T)
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "month", addEllipses = T)
+factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "occasion", addEllipses = T, axes = 3:4)
+factoextra::fviz_pca_ind(season_pca, geom = "", habillage = "year", addEllipses = T, axes = 3:4)
+# FactoInvestigate::Investigate(season_pca)
 ```
 
