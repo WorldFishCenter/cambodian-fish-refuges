@@ -33,8 +33,9 @@ dry season to guide development, conservation and fisheries strategy.
   - [Sampling bias](notebooks/sampling-bias.md)
   - [Catch composition](notebooks/catch-composition.md)
   - [Seasonality](notebooks/seasonality.md)
+  - [Correspondence analysis](notebooks/correspondence-analysis.md)
+  - [Alpha diversity patterns](notebooks/diversity.md)
 
 **Analysis**
 
   - [Tentative analysis plan](notebooks/analysis-plan.md)
-  - [Correspondence analysis](notebooks/correspondence-analysis.md)
