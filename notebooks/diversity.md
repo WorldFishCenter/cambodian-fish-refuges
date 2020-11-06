@@ -87,7 +87,7 @@ occasion_cov <- occasion_info %>%
          aquatic_plant_index = aquatic_plant_area * aquatic_plant_density, 
          across(c("month", "year"), as.character)) %>%
   select(occasion, year, season, month, water_level, water_temp, visibility,
-         aquatic_plant_index) %>%
+         aquatic_plant_area, aquatic_plant_index, brush_park) %>%
   distinct()
 
 refuge_cov <- refuge_info %>%
@@ -116,8 +116,8 @@ inspectdf::inspect_na(diversity_cov) %>% filter(pcnt > 0) %>% knitr::kable()
 
 | col\_name             | cnt |      pcnt |
 | :-------------------- | --: | --------: |
-| water\_temp           | 280 | 1.3617352 |
-| aquatic\_plant\_index |  40 | 0.1945336 |
+| water\_temp           | 280 | 1.3564577 |
+| aquatic\_plant\_index |  40 | 0.1937797 |
 
 It appears that all cases of missing water temperature are within the
 first occasion at the end of the wet season in 2012.
@@ -174,6 +174,9 @@ water temperature.
 Dry depth and dry area appear to be non-seasonal factors that are
 positively correlated with diversity.
 
+These results generally agree with the multivariate analysis of
+[seasonality](%22seasonality.md%22)
+
 ``` r
 inspectdf::inspect_cor(diversity_cov, method = "spearman") %>% inspectdf::show_plot()
 ```
@@ -190,3 +193,70 @@ inspectdf::inspect_cor(diversity_cov, method = "pearson") %>% inspectdf::show_pl
 ```
 
 ![](diversity_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+### Statistical model
+
+A quick exploration of the diversity parameters.
+
+First, we are interested on investigating whether there are diversity
+differences across seasons, and particularly the beginning and the end
+of each of them. First, we use a extra simple model with seasons/months
+as categorical values which is looking for significant differences among
+them. Then, we look at a more mechanistic point of view which looks at
+the environmental factors that promote diversity.
+
+``` r
+m_c <- brms::brm(diversity_alpha ~ month + year, data = diversity_cov, cores = 4)
+```
+
+    ## Compiling Stan program...
+
+    ## Start sampling
+
+``` r
+plot(brms::conditional_effects(m_c), ask = F)
+```
+
+![](diversity_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+
+``` r
+brms::bayes_R2(m_c)
+```
+
+    ##     Estimate   Est.Error      Q2.5     Q97.5
+    ## R2 0.1078166 0.003814142 0.1004648 0.1154571
+
+``` r
+m_m <- brms::brm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
+           data = diversity_cov, cores = 4)
+```
+
+    ## Compiling Stan program...
+    ## Start sampling
+
+``` r
+plot(brms::conditional_effects(m_m), ask = F, points = T)
+```
+
+![](diversity_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-6.png)<!-- -->
+
+``` r
+brms::bayes_R2(m_m)
+```
+
+    ##       Estimate   Est.Error        Q2.5      Q97.5
+    ## R2 0.009588797 0.001359923 0.007054068 0.01235044
+
+We found that the average difference between the beginning and end of
+the seasons is fairly small and that the differences among years is also
+relatively small.
+
+The model with mechanistic variables show some significant relationships
+but the R2 of that model is really small. Suggesting that they are not
+as important on its own and account for only a small amount of
+variability that can be explained by treating seasonality as a
+categorical variable.
+
+If we use models like this in the actual paper we should focus on the
+categorical model and explain how environmental co-variates change
+across seasons.

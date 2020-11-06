@@ -34,6 +34,7 @@ notebooks_plan <- drake_plan(
   catch_comp_nb = target(rmarkdown::render(knitr_in("notebooks/catch-composition.Rmd"))),
   seasonality_nb = target(rmarkdown::render(knitr_in("notebooks/seasonality.Rmd"))),
   correspondence_nb = target(rmarkdown::render(knitr_in("notebooks/correspondence-analysis.Rmd"))),
+  diversity_nb = target(rmarkdown::render(knitr_in("notebooks/diversity.Rmd"))),
   readme = target(rmarkdown::render(knitr_in("README.Rmd"))),
 )
 
@@ -44,5 +45,5 @@ full_plan <- rbind(script_variables,
 # Execute plan ------------------------------------------------------------
 
 if (!is.null(full_plan)) {
-  make(full_plan)
+  make(full_plan, lock_envir = F)
 }

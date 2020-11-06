@@ -86,7 +86,7 @@ occasion_cov <- occasion_info %>%
          aquatic_plant_index = aquatic_plant_area * aquatic_plant_density, 
          across(c("month", "year"), as.character)) %>%
   select(occasion, year, season, month, water_level, water_temp, visibility,
-         aquatic_plant_index) %>%
+         aquatic_plant_area, aquatic_plant_index, brush_park) %>%
   distinct()
 
 refuge_cov <- refuge_info %>%
@@ -149,6 +149,8 @@ Also there seems to be a positive relationship between visibility, water level, 
 
 Dry depth and dry area appear to be non-seasonal factors that are positively correlated with diversity. 
 
+These results generally agree with the multivariate analysis of [seasonality]("seasonality.md")
+
 ```{r}
 inspectdf::inspect_cor(diversity_cov, method = "spearman") %>% inspectdf::show_plot()
 ```
@@ -158,4 +160,28 @@ When using a Pearson correlation coefficient, patterns hold except for the aquat
 ```{r}
 inspectdf::inspect_cor(diversity_cov, method = "pearson") %>% inspectdf::show_plot()
 ```
+
+### Statistical model
+
+A quick exploration of the diversity parameters. 
+
+First, we are interested on investigating whether there are diversity differences across seasons, and particularly the beginning and the end of each of them. 
+First, we use a extra simple model with seasons/months as categorical values which is looking for significant differences among them.
+Then, we look at a more mechanistic point of view which looks at the environmental factors that promote diversity.
+
+```{r}
+m_c <- brms::brm(diversity_alpha ~ month + year, data = diversity_cov, cores = 4)
+plot(brms::conditional_effects(m_c), ask = F)
+brms::bayes_R2(m_c)
+m_m <- brms::brm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
+           data = diversity_cov, cores = 4)
+plot(brms::conditional_effects(m_m), ask = F, points = T)
+brms::bayes_R2(m_m)
+```
+
+We found that the average difference between the beginning and end of the seasons is fairly small and that the differences among years is also relatively small. 
+
+The model with mechanistic variables show some significant relationships but the R2 of that model is really small. Suggesting that they are not as important on its own and account for only a small amount of variability that can be explained by treating seasonality as a categorical variable. 
+
+If we use models like this in the actual paper we should focus on the categorical model and explain how environmental co-variates change across seasons. 
 
