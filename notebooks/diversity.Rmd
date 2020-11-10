@@ -170,13 +170,11 @@ First, we use a extra simple model with seasons/months as categorical values whi
 Then, we look at a more mechanistic point of view which looks at the environmental factors that promote diversity.
 
 ```{r}
-m_c <- brms::brm(diversity_alpha ~ month + year, data = diversity_cov, cores = 4)
-plot(brms::conditional_effects(m_c), ask = F)
-brms::bayes_R2(m_c)
-m_m <- brms::brm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
-           data = diversity_cov, cores = 4)
-plot(brms::conditional_effects(m_m), ask = F, points = T)
-brms::bayes_R2(m_m)
+m_c <- lm(diversity_alpha ~ month + year, data = diversity_cov)
+summary(m_c)
+m_m <- lm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
+           data = diversity_cov)
+summary(m_m)
 ```
 
 We found that the average difference between the beginning and end of the seasons is fairly small and that the differences among years is also relatively small. 

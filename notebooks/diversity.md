@@ -206,46 +206,63 @@ them. Then, we look at a more mechanistic point of view which looks at
 the environmental factors that promote diversity.
 
 ``` r
-m_c <- brms::brm(diversity_alpha ~ month + year, data = diversity_cov, cores = 4)
+m_c <- lm(diversity_alpha ~ month + year, data = diversity_cov)
+summary(m_c)
 ```
 
-    ## Compiling Stan program...
-
-    ## Start sampling
+    ## 
+    ## Call:
+    ## lm(formula = diversity_alpha ~ month + year, data = diversity_cov)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -2.33744 -0.26551  0.05699  0.32983  1.07401 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  2.675336   0.011630 230.045  < 2e-16 ***
+    ## month2      -0.046763   0.009536  -4.904 9.46e-07 ***
+    ## month5      -0.324776   0.009536 -34.060  < 2e-16 ***
+    ## month8      -0.354416   0.009496 -37.324  < 2e-16 ***
+    ## year2013    -0.013122   0.014257  -0.920    0.357    
+    ## year2014     0.020079   0.014247   1.409    0.159    
+    ## year2015    -0.013607   0.014247  -0.955    0.340    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4652 on 20635 degrees of freedom
+    ## Multiple R-squared:  0.1077, Adjusted R-squared:  0.1074 
+    ## F-statistic: 414.9 on 6 and 20635 DF,  p-value: < 2.2e-16
 
 ``` r
-plot(brms::conditional_effects(m_c), ask = F)
+m_m <- lm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
+           data = diversity_cov)
+summary(m_m)
 ```
 
-![](diversity_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
-
-``` r
-brms::bayes_R2(m_c)
-```
-
-    ##     Estimate   Est.Error      Q2.5     Q97.5
-    ## R2 0.1078166 0.003814142 0.1004648 0.1154571
-
-``` r
-m_m <- brms::brm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
-           data = diversity_cov, cores = 4)
-```
-
-    ## Compiling Stan program...
-    ## Start sampling
-
-``` r
-plot(brms::conditional_effects(m_m), ask = F, points = T)
-```
-
-![](diversity_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->![](diversity_files/figure-gfm/unnamed-chunk-12-6.png)<!-- -->
-
-``` r
-brms::bayes_R2(m_m)
-```
-
-    ##       Estimate   Est.Error        Q2.5      Q97.5
-    ## R2 0.009588797 0.001359923 0.007054068 0.01235044
+    ## 
+    ## Call:
+    ## lm(formula = diversity_alpha ~ water_level + aquatic_plant_area + 
+    ##     brush_park + water_temp, data = diversity_cov)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -2.57908 -0.29393  0.05067  0.37234  1.13308 
+    ## 
+    ## Coefficients:
+    ##                      Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         2.862e+00  4.096e-02  69.874   <2e-16 ***
+    ## water_level         3.915e-04  4.613e-05   8.486   <2e-16 ***
+    ## aquatic_plant_area  2.377e-04  1.268e-04   1.875   0.0608 .  
+    ## brush_park         -1.317e-05  1.500e-05  -0.878   0.3799    
+    ## water_temp         -1.457e-02  1.342e-03 -10.859   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4896 on 20357 degrees of freedom
+    ##   (280 observations deleted due to missingness)
+    ## Multiple R-squared:  0.009384,   Adjusted R-squared:  0.00919 
+    ## F-statistic: 48.21 on 4 and 20357 DF,  p-value: < 2.2e-16
 
 We found that the average difference between the beginning and end of
 the seasons is fairly small and that the differences among years is also
