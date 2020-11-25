@@ -35,6 +35,7 @@ dry season to guide development, conservation and fisheries strategy.
   - [Seasonality](notebooks/seasonality.md)
   - [Correspondence analysis](notebooks/correspondence-analysis.md)
   - [Alpha diversity patterns](notebooks/diversity.md)
+  - [Beta diversity patterns](notebooks/beta-diversity-index.md)
 
 **Analysis**
 

@@ -22,6 +22,7 @@ Inland fisheries of the southern Mekong basin are some of the largest in the wor
 * [Seasonality](notebooks/seasonality.md)
 * [Correspondence analysis](notebooks/correspondence-analysis.md)
 * [Alpha diversity patterns](notebooks/diversity.md)
+* [Beta diversity patterns](notebooks/beta-diversity-index.md)
 
 **Analysis**
 

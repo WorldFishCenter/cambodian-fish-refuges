@@ -35,6 +35,7 @@ notebooks_plan <- drake_plan(
   seasonality_nb = target(rmarkdown::render(knitr_in("notebooks/seasonality.Rmd"))),
   correspondence_nb = target(rmarkdown::render(knitr_in("notebooks/correspondence-analysis.Rmd"))),
   diversity_nb = target(rmarkdown::render(knitr_in("notebooks/diversity.Rmd"))),
+  beta_diversity_nb = target(rmarkdown::render(knitr_in("notebooks/beta-diversity-index.Rmd"))),
   readme = target(rmarkdown::render(knitr_in("README.Rmd"))),
 )
 
