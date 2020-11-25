@@ -85,7 +85,7 @@ occasion_cov <- occasion_info %>%
          visibility = secchi_depth, 
          aquatic_plant_index = aquatic_plant_area * aquatic_plant_density, 
          across(c("month", "year"), as.character)) %>%
-  select(occasion, year, season, month, water_level, water_temp, visibility,
+  select(refuge, occasion, year, season, month, water_level, water_temp, visibility,
          aquatic_plant_area, aquatic_plant_index, brush_park) %>%
   distinct()
 
@@ -98,7 +98,7 @@ refuge_cov <- refuge_info %>%
 
 diversity_cov <- diversity %>%
   left_join(refuge_cov, by = "refuge") %>%
-  left_join(occasion_cov, by = "occasion") %>%
+  left_join(occasion_cov, by = c("occasion", "refuge")) %>%
   filter(gear == "GN")
 ```
 
@@ -182,4 +182,23 @@ We found that the average difference between the beginning and end of the season
 The model with mechanistic variables show some significant relationships but the R2 of that model is really small. Suggesting that they are not as important on its own and account for only a small amount of variability that can be explained by treating seasonality as a categorical variable. 
 
 If we use models like this in the actual paper we should focus on the categorical model and explain how environmental co-variates change across seasons. 
+
+
+```{r}
+diversity_wide <- diversity_cov %>%
+  mutate(year_s = (as.numeric(substr(occasion, 3, 4))-1) %/% 4, 
+         month_s = paste0("m_", month)) %>% 
+  pivot_wider(id_cols = c(refuge, year), 
+              names_from = month_s, 
+              values_from = diversity_alpha) 
+
+diversity_wide %>%
+  inspectdf::inspect_cor() %>%
+  inspectdf::show_plot()
+
+library(brms)
+
+m_dw <- brm(m_8 ~ m_5 + (1 | year) + (1 | refuge), data = diversity_wide)
+summary(m_dw)
+```
 

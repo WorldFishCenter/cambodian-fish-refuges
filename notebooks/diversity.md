@@ -86,7 +86,7 @@ occasion_cov <- occasion_info %>%
          visibility = secchi_depth, 
          aquatic_plant_index = aquatic_plant_area * aquatic_plant_density, 
          across(c("month", "year"), as.character)) %>%
-  select(occasion, year, season, month, water_level, water_temp, visibility,
+  select(refuge, occasion, year, season, month, water_level, water_temp, visibility,
          aquatic_plant_area, aquatic_plant_index, brush_park) %>%
   distinct()
 
@@ -99,7 +99,7 @@ refuge_cov <- refuge_info %>%
 
 diversity_cov <- diversity %>%
   left_join(refuge_cov, by = "refuge") %>%
-  left_join(occasion_cov, by = "occasion") %>%
+  left_join(occasion_cov, by = c("occasion", "refuge")) %>%
   filter(gear == "GN")
 ```
 
@@ -116,8 +116,8 @@ inspectdf::inspect_na(diversity_cov) %>% filter(pcnt > 0) %>% knitr::kable()
 
 | col\_name             | cnt |      pcnt |
 | :-------------------- | --: | --------: |
-| water\_temp           | 280 | 1.3564577 |
-| aquatic\_plant\_index |  40 | 0.1937797 |
+| water\_temp           |   7 | 1.3513514 |
+| aquatic\_plant\_index |   1 | 0.1930502 |
 
 It appears that all cases of missing water temperature are within the
 first occasion at the end of the wet season in 2012.
@@ -216,23 +216,23 @@ summary(m_c)
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -2.33744 -0.26551  0.05699  0.32983  1.07401 
+    ## -2.33628 -0.26363  0.05577  0.32932  1.07517 
     ## 
     ## Coefficients:
-    ##              Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  2.675336   0.011630 230.045  < 2e-16 ***
-    ## month2      -0.046763   0.009536  -4.904 9.46e-07 ***
-    ## month5      -0.324776   0.009536 -34.060  < 2e-16 ***
-    ## month8      -0.354416   0.009496 -37.324  < 2e-16 ***
-    ## year2013    -0.013122   0.014257  -0.920    0.357    
-    ## year2014     0.020079   0.014247   1.409    0.159    
-    ## year2015    -0.013607   0.014247  -0.955    0.340    
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  2.67534    0.07409  36.107  < 2e-16 ***
+    ## month2      -0.04734    0.06063  -0.781    0.435    
+    ## month5      -0.32535    0.06063  -5.367 1.22e-07 ***
+    ## month8      -0.35442    0.06050  -5.858 8.38e-09 ***
+    ## year2013    -0.01370    0.09079  -0.151    0.880    
+    ## year2014     0.02037    0.09076   0.224    0.823    
+    ## year2015    -0.01332    0.09076  -0.147    0.883    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.4652 on 20635 degrees of freedom
-    ## Multiple R-squared:  0.1077, Adjusted R-squared:  0.1074 
-    ## F-statistic: 414.9 on 6 and 20635 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.4686 on 511 degrees of freedom
+    ## Multiple R-squared:  0.1075, Adjusted R-squared:  0.09702 
+    ## F-statistic: 10.26 on 6 and 511 DF,  p-value: 9.781e-11
 
 ``` r
 m_m <- lm(diversity_alpha ~ water_level + aquatic_plant_area + brush_park + water_temp, 
@@ -247,22 +247,22 @@ summary(m_m)
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -2.57908 -0.29393  0.05067  0.37234  1.13308 
+    ## -2.48739 -0.30476  0.04681  0.36366  1.10807 
     ## 
     ## Coefficients:
     ##                      Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)         2.862e+00  4.096e-02  69.874   <2e-16 ***
-    ## water_level         3.915e-04  4.613e-05   8.486   <2e-16 ***
-    ## aquatic_plant_area  2.377e-04  1.268e-04   1.875   0.0608 .  
-    ## brush_park         -1.317e-05  1.500e-05  -0.878   0.3799    
-    ## water_temp         -1.457e-02  1.342e-03 -10.859   <2e-16 ***
+    ## (Intercept)         2.958e+00  2.569e-01  11.517   <2e-16 ***
+    ## water_level         1.388e-04  2.893e-04   0.480   0.6316    
+    ## aquatic_plant_area -9.713e-04  7.941e-04  -1.223   0.2218    
+    ## brush_park          1.696e-04  9.406e-05   1.803   0.0719 .  
+    ## water_temp         -1.639e-02  8.415e-03  -1.947   0.0521 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.4896 on 20357 degrees of freedom
-    ##   (280 observations deleted due to missingness)
-    ## Multiple R-squared:  0.009384,   Adjusted R-squared:  0.00919 
-    ## F-statistic: 48.21 on 4 and 20357 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.4864 on 506 degrees of freedom
+    ##   (7 observations deleted due to missingness)
+    ## Multiple R-squared:  0.01968,    Adjusted R-squared:  0.01193 
+    ## F-statistic:  2.54 on 4 and 506 DF,  p-value: 0.03914
 
 We found that the average difference between the beginning and end of
 the seasons is fairly small and that the differences among years is also
@@ -277,3 +277,202 @@ categorical variable.
 If we use models like this in the actual paper we should focus on the
 categorical model and explain how environmental co-variates change
 across seasons.
+
+``` r
+diversity_wide <- diversity_cov %>%
+  mutate(year_s = (as.numeric(substr(occasion, 3, 4))-1) %/% 4, 
+         month_s = paste0("m_", month)) %>% 
+  pivot_wider(id_cols = c(refuge, year), 
+              names_from = month_s, 
+              values_from = diversity_alpha) 
+
+diversity_wide %>%
+  inspectdf::inspect_cor() %>%
+  inspectdf::show_plot()
+```
+
+![](diversity_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+library(brms)
+```
+
+    ## Loading required package: Rcpp
+
+    ## Loading 'brms' package (version 2.14.4). Useful instructions
+    ## can be found by typing help('brms'). A more detailed introduction
+    ## to the package is available through vignette('brms_overview').
+
+    ## 
+    ## Attaching package: 'brms'
+
+    ## The following object is masked from 'package:stats':
+    ## 
+    ##     ar
+
+``` r
+m_dw <- brm(m_8 ~ m_5 + (1 | year) + (1 | refuge), data = diversity_wide)
+```
+
+    ## Compiling Stan program...
+
+    ## Trying to compile a simple C file
+
+    ## Running /usr/local/lib/R/bin/R CMD SHLIB foo.c
+    ## make[1]: Entering directory '/tmp/RtmpZ9o6Ja'
+    ## gcc -I"/usr/local/lib/R/include" -DNDEBUG   -I"/usr/local/lib/R/site-library/Rcpp/include/"  -I"/usr/local/lib/R/site-library/RcppEigen/include/"  -I"/usr/local/lib/R/site-library/RcppEigen/include/unsupported"  -I"/usr/local/lib/R/site-library/BH/include" -I"/usr/local/lib/R/site-library/StanHeaders/include/src/"  -I"/usr/local/lib/R/site-library/StanHeaders/include/"  -I"/usr/local/lib/R/site-library/RcppParallel/include/"  -I"/usr/local/lib/R/site-library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DBOOST_NO_AUTO_PTR  -include '/usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fpic  -g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
+    ## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:88,
+    ##                  from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
+    ##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
+    ##                  from <command-line>:
+    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
+    ##   613 | namespace Eigen {
+    ##       | ^~~~~~~~~
+    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
+    ##   613 | namespace Eigen {
+    ##       |                 ^
+    ## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
+    ##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
+    ##                  from <command-line>:
+    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
+    ##    96 | #include <complex>
+    ##       |          ^~~~~~~~~
+    ## compilation terminated.
+    ## make[1]: *** [/usr/local/lib/R/etc/Makeconf:167: foo.o] Error 1
+    ## make[1]: Leaving directory '/tmp/RtmpZ9o6Ja'
+
+    ## Start sampling
+
+    ## 
+    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 1).
+    ## Chain 1: 
+    ## Chain 1: Gradient evaluation took 2.5e-05 seconds
+    ## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.25 seconds.
+    ## Chain 1: Adjust your expectations accordingly!
+    ## Chain 1: 
+    ## Chain 1: 
+    ## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+    ## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+    ## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+    ## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+    ## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+    ## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+    ## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+    ## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+    ## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+    ## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+    ## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+    ## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+    ## Chain 1: 
+    ## Chain 1:  Elapsed Time: 0.350817 seconds (Warm-up)
+    ## Chain 1:                0.188193 seconds (Sampling)
+    ## Chain 1:                0.53901 seconds (Total)
+    ## Chain 1: 
+    ## 
+    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 2).
+    ## Chain 2: 
+    ## Chain 2: Gradient evaluation took 1.7e-05 seconds
+    ## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.17 seconds.
+    ## Chain 2: Adjust your expectations accordingly!
+    ## Chain 2: 
+    ## Chain 2: 
+    ## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+    ## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+    ## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+    ## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+    ## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+    ## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+    ## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+    ## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+    ## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+    ## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+    ## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+    ## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+    ## Chain 2: 
+    ## Chain 2:  Elapsed Time: 0.432774 seconds (Warm-up)
+    ## Chain 2:                0.369537 seconds (Sampling)
+    ## Chain 2:                0.802311 seconds (Total)
+    ## Chain 2: 
+    ## 
+    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 3).
+    ## Chain 3: 
+    ## Chain 3: Gradient evaluation took 1.8e-05 seconds
+    ## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.18 seconds.
+    ## Chain 3: Adjust your expectations accordingly!
+    ## Chain 3: 
+    ## Chain 3: 
+    ## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+    ## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+    ## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+    ## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+    ## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+    ## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+    ## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+    ## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+    ## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+    ## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+    ## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+    ## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+    ## Chain 3: 
+    ## Chain 3:  Elapsed Time: 0.442173 seconds (Warm-up)
+    ## Chain 3:                0.23461 seconds (Sampling)
+    ## Chain 3:                0.676783 seconds (Total)
+    ## Chain 3: 
+    ## 
+    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 4).
+    ## Chain 4: 
+    ## Chain 4: Gradient evaluation took 2.4e-05 seconds
+    ## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.24 seconds.
+    ## Chain 4: Adjust your expectations accordingly!
+    ## Chain 4: 
+    ## Chain 4: 
+    ## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+    ## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+    ## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+    ## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+    ## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+    ## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+    ## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+    ## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+    ## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+    ## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+    ## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+    ## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+    ## Chain 4: 
+    ## Chain 4:  Elapsed Time: 0.594425 seconds (Warm-up)
+    ## Chain 4:                1.01005 seconds (Sampling)
+    ## Chain 4:                1.60448 seconds (Total)
+    ## Chain 4:
+
+``` r
+summary(m_dw)
+```
+
+    ##  Family: gaussian 
+    ##   Links: mu = identity; sigma = identity 
+    ## Formula: m_8 ~ m_5 + (1 | year) + (1 | refuge) 
+    ##    Data: diversity_wide (Number of observations: 119) 
+    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+    ##          total post-warmup samples = 4000
+    ## 
+    ## Group-Level Effects: 
+    ## ~refuge (Number of levels: 40) 
+    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sd(Intercept)     0.27      0.06     0.15     0.40 1.00      859     1205
+    ## 
+    ## ~year (Number of levels: 3) 
+    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sd(Intercept)     0.11      0.15     0.00     0.51 1.01      870      761
+    ## 
+    ## Population-Level Effects: 
+    ##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## Intercept     1.56      0.25     1.08     2.09 1.01      797      535
+    ## m_5           0.32      0.09     0.13     0.51 1.00     1160     1384
+    ## 
+    ## Family Specific Parameters: 
+    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sigma     0.36      0.03     0.30     0.43 1.00      940      553
+    ## 
+    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
+    ## scale reduction factor on split chains (at convergence, Rhat = 1).
