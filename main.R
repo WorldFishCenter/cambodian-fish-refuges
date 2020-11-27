@@ -29,13 +29,6 @@ data_preprocessing <- drake_plan(
   catch_info = get_catch_info(community_data),
 )
 
-analysis_plan <- drake_plan(
-  species_totals_in_occasion = calc_species_totals_in_occasion(catch_info),
-  occasion_covariates = get_occasion_covariates(occasion_info),
-  refuge_covariates = get_refuge_covariates(refuge_info),
-  model_alpha_diversity = fit_alpha_diversity_model(catch_info, occasion_covariates, refuge_covariates),
-)
-
 notebooks_plan <- drake_plan(
   sampling_bias_nb = target(rmarkdown::render(knitr_in("notebooks/sampling-bias.Rmd"))),
   catch_comp_nb = target(rmarkdown::render(knitr_in("notebooks/catch-composition.Rmd"))),
@@ -45,6 +38,15 @@ notebooks_plan <- drake_plan(
   beta_diversity_nb = target(rmarkdown::render(knitr_in("notebooks/beta-diversity-index.Rmd"))),
   readme = target(rmarkdown::render(knitr_in("README.Rmd"))),
 )
+
+analysis_plan <- drake_plan(
+  species_totals_in_occasion = calc_species_totals_in_occasion(catch_info),
+  occasion_covariates = get_occasion_covariates(occasion_info),
+  refuge_covariates = get_refuge_covariates(refuge_info),
+  model_alpha_diversity = fit_alpha_diversity_model(catch_info, occasion_covariates, refuge_covariates),
+  prelim_report = target(rmarkdown::render(knitr_in("notebooks/report.Rmd"))),
+)
+
 
 full_plan <- rbind(script_variables,
                    data_preprocessing,

@@ -1,0 +1,143 @@
+---
+title: "Preliminary analysis"
+output:
+  github_document:
+    html_preview: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7, warning = F)
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+library(brms)
+library(ggdist)
+```
+
+## Question 1
+
+Does aquatic food  diversity changes throughout the year? We hypothesise diversity is the lowest in May, at the end of the dry season, and the highest on November, at the end of the wet season, when fields are usually flooded and there is potential for species from multiple dry season refuges in the landscape to mix. 
+
+### Methods
+
+- Selected only surveys performed with gill net which were performed across all seasons
+- Added number of individuals across replicates within a sampling occasion together
+- Calculated the Shannon diversity index of (log) species abundance for each refuge and occasion
+- Used a Bayesian test to compare diversity across the year. We included year and the refuge identity nested inside refuge type as random effects. For year we calculated a random intercept and also allowed month estimates to vary across years. To account for uneven sampling in smaller sites we included the (log) number of replicates in each sampling occasion an offset. 
+- Tested the hypotheses comparing diversity across the year and across different refuge category types.
+
+### Results
+
+```{r adiversity-hypothesis, echo = FALSE, message = FALSE}
+drake::loadd(model_alpha_diversity)
+
+h1 <- hypothesis(model_alpha_diversity, c("month_sm_2 < 0", "month_sm_5 < 0", "month_sm_8 < 0", "month_sm_5 < month_sm_2", "month_sm_5 < month_sm_8"))
+
+h1_c <- h1$hypothesis$Post.Prob %>% subtract(1, .) %>% format.pval(digits = 1, eps = 1/10000)
+
+m_posterior_samples <- model_alpha_diversity %>%
+  posterior_samples() %>%
+  as.data.frame() 
+```
+
+- The R^2^ of our model was between `r round(bayes_R2(model_alpha_diversity)[1,3], 2)` and `r round(bayes_R2(model_alpha_diversity)[1,4], 2)` (95% probability) which indicates that the model was able to account for a substantial proportion of the variation in alpha diversity. 
+- We found that the alpha diversity in November, at the end of the wet season was very likely higher than the diversity in August (at the beginning of the wet season; *p* = `r h1_c[3]`). Diversity in November was also likely to be higher than the diversity during the dry season but the difference was not significant at the *α* = 0.05 level (*p* = `r h1_c[1]` for February and *p* = `r h1_c[2]` for May).
+- Similarly, we found that alpha diversity in May was likely to be smaller than the diversity in February but the difference was not significant at the 0.05 level (*p* = `r h1_c[4]`).
+
+```{r diversity-over-year, fig.height = 2.5, fig.width = 4, echo = F, caption = "xxx"}
+
+to_month_name <- function(x){
+  stringr::str_extract(x, "[0-9]+") %>% 
+    as.numeric() %>% 
+    {month.name[.]}
+}
+
+month_samples <- model_alpha_diversity %>%
+  posterior_epred(newdata = data.frame(
+    month_s = unique(model_alpha_diversity$data$month_s), 
+    n_samples = 8), 
+    re_formula = NA) %>%
+  set_colnames(unique(model_alpha_diversity$data$month_s)) %>%
+  as.data.frame.table() %>%
+  dplyr::rename(month_s = Var2) %>%
+  dplyr::rename(Estimate = Freq, sample = Var1)
+
+month_samples %>%
+  ggplot(aes(y = Estimate, x = month_s, 
+             #colour = month_s %in% c("m_2", "m_5"), 
+             # fill = month_s %in% c("m_2", "m_5")
+             )) +
+  geom_text(data = tibble(dummy = 1), 
+            x = 2.5, label = "Dry season", y = 1.75, inherit.aes = F, 
+            colour = "grey30",
+            size = 3.1) +
+  geom_rect(data = tibble(),
+            aes(xmin = 1.5, xmax = 3.5, ymin = -Inf, ymax = Inf),
+            inherit.aes = F, fill = "grey70", alpha = 0.25) +
+  stat_eye(slab_alpha = 0.33, .width = c(.95, .66)) +
+  scale_x_discrete(labels = to_month_name) +
+  scale_fill_manual(values = c("#0571b0", "#ca0020"), 
+                    aesthetics = c("colour", "fill")) +
+  theme_minimal() +
+  labs(y = "Shannon index") +
+  theme(axis.title.x = element_blank(), 
+        panel.grid.major.x = element_blank(), 
+        legend.position = "none")
+```
+
+*Figure 1: Density distribution of the mean alpha-diversity over the year. February and March are predominantly in the dry season. Dots indicate the median of the distribution and lines indicate the 66 and 95% credible intervals. Shannon diversity values have been standardised for eight replicates for each sampling occasion.*
+
+```{r adiversity-random-hypothesis, echo = FALSE}
+h2 <- hypothesis(model_alpha_diversity, c("sd_category_name:cfr_name__Intercept > sd_category_name__Intercept", "sd_category_name:cfr_name__Intercept > sd_year_s__Intercept", "r_category_name[Demarcated.area.in.larger.water.body,Intercept] < 0", "r_category_name[Community.pond.within.agricultural.land.prone.to.flood,Intercept] > 0", "r_category_name[Demarcated.area.in.larger.water.body,Intercept] < r_category_name[Community.pond.within.agricultural.land.prone.to.flood,Intercept]"), 
+                 class = NULL)
+
+r_diffs <- m_posterior_samples %>%
+  mutate(rf_vs_categ = `sd_category_name:cfr_name__Intercept` / `sd_category_name__Intercept`, 
+         rf_vs_year = `sd_category_name:cfr_name__Intercept` / `sd_year_s__Intercept`) 
+
+rf_vs_categ <- r_diffs$rf_vs_categ %>% quantile() %>% round()
+rf_vs_year <- r_diffs$rf_vs_year %>% quantile() %>% round()
+```
+
+- When looking at the random effects, we found that the variability in alpha diversity across refuges was very likely (with a 95% probability) to be between `r rf_vs_year[2]` and `r rf_vs_year[4]` times larger than the variability across year and between `r rf_vs_categ[2]` and `r rf_vs_categ[4]` times larger than the variability across refuge categories. 
+- The data does not suggest that there are important differences among refuge classes. Nevertheless there is substantial evidence (`r scales::percent(h2$hypothesis$Post.Prob[5])` likelihood) that mean diversity in refuges that consist in a demarcated area in a larger water body with perennial fishing is slightly smaller than diversity in community ponds within agricultural land prone to flood.
+
+## Question 2
+
+Does the diversity at the end of the dry season actually influences the diversity in the wet season?
+
+### Methods
+
+- Used a Bayesian regression to test whether dive diversity across the year. We included year, and refuge nested inside refuge type as random effects with varying intercept. To account for uneven sampling in smaller sites we included the (log) number of replicates in each sampling occasion an offset. 
+
+## Question 3
+
+Which environmental factors drive the changes in community composition and potential decrease in species abbundance/richness between start and end of dry season?
+
+## Supplementary figures
+
+```{r adiversity-random-figure}
+ref_data <- model_alpha_diversity %>%
+  posterior_samples() %>%
+  as.data.frame() %>%
+  sample_frac(0.1) %>%
+  select(starts_with("r_")) %>%
+  pivot_longer(everything()) %>%
+  mutate(random_effect = stringr::str_extract(name, ".+(?=\\[)"),
+         name = str_extract(name, "(?<=\\[).+(?=,)"),
+         name = if_else(str_detect(name, "_"),
+                        str_extract(name, "(?<=_).+"),
+                        name),
+         name = snakecase::to_sentence_case(name)) %>%
+  mutate(name = fct_reorder(name, value, .desc = T), 
+         random_effect = fct_reorder(random_effect, value, 
+                                     function(x){median(abs(x))}, 
+                                     .desc = T))
+
+ref_data %>%
+  ggplot(aes(y = name, x = value)) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  stat_pointinterval() +
+  facet_grid(random_effect ~ ., scales = "free", space = "free") +
+  theme_minimal()
+```
