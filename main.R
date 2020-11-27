@@ -48,7 +48,8 @@ notebooks_plan <- drake_plan(
 
 full_plan <- rbind(script_variables,
                    data_preprocessing,
-                   notebooks_plan)
+                   notebooks_plan,
+                   analysis_plan)
 
 # Execute plan ------------------------------------------------------------
 
