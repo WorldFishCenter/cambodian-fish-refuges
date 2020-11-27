@@ -4,7 +4,8 @@ get_refuge_info <- function(community_data){
     dplyr::select(refuge, cfr_name, village, commune, district, province,
                   agro_eco_zone, fia_designated,
                   category:rf_area_connected_in_dry_season_ha) %>%
-    dplyr::distinct()
+    dplyr::distinct() %>%
+    dplyr::mutate(category_name = stringr::str_remove(category_name, "\\s\\(.+\\)"))
 }
 
 # Check the site information looks alright
