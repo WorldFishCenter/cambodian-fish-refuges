@@ -196,9 +196,9 @@ diversity_wide %>%
   inspectdf::inspect_cor() %>%
   inspectdf::show_plot()
 
-library(brms)
-
-m_dw <- brm(m_8 ~ m_5 + (1 | year) + (1 | refuge), data = diversity_wide)
+m_dw <- lm(m_8 ~ m_5, data = diversity_wide)
+m_dw2 <- lm(m_11 ~ m_5, data = diversity_wide)
 summary(m_dw)
+summary(m_dw2)
 ```
 

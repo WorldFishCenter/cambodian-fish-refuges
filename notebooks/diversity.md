@@ -294,185 +294,51 @@ diversity_wide %>%
 ![](diversity_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-library(brms)
-```
-
-    ## Loading required package: Rcpp
-
-    ## Loading 'brms' package (version 2.14.4). Useful instructions
-    ## can be found by typing help('brms'). A more detailed introduction
-    ## to the package is available through vignette('brms_overview').
-
-    ## 
-    ## Attaching package: 'brms'
-
-    ## The following object is masked from 'package:stats':
-    ## 
-    ##     ar
-
-``` r
-m_dw <- brm(m_8 ~ m_5 + (1 | year) + (1 | refuge), data = diversity_wide)
-```
-
-    ## Compiling Stan program...
-
-    ## Trying to compile a simple C file
-
-    ## Running /usr/local/lib/R/bin/R CMD SHLIB foo.c
-    ## make[1]: Entering directory '/tmp/RtmpZ9o6Ja'
-    ## gcc -I"/usr/local/lib/R/include" -DNDEBUG   -I"/usr/local/lib/R/site-library/Rcpp/include/"  -I"/usr/local/lib/R/site-library/RcppEigen/include/"  -I"/usr/local/lib/R/site-library/RcppEigen/include/unsupported"  -I"/usr/local/lib/R/site-library/BH/include" -I"/usr/local/lib/R/site-library/StanHeaders/include/src/"  -I"/usr/local/lib/R/site-library/StanHeaders/include/"  -I"/usr/local/lib/R/site-library/RcppParallel/include/"  -I"/usr/local/lib/R/site-library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DBOOST_NO_AUTO_PTR  -include '/usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fpic  -g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
-    ## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:88,
-    ##                  from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
-    ##                  from <command-line>:
-    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
-    ##   613 | namespace Eigen {
-    ##       | ^~~~~~~~~
-    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
-    ##   613 | namespace Eigen {
-    ##       |                 ^
-    ## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
-    ##                  from <command-line>:
-    ## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
-    ##    96 | #include <complex>
-    ##       |          ^~~~~~~~~
-    ## compilation terminated.
-    ## make[1]: *** [/usr/local/lib/R/etc/Makeconf:167: foo.o] Error 1
-    ## make[1]: Leaving directory '/tmp/RtmpZ9o6Ja'
-
-    ## Start sampling
-
-    ## 
-    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 1).
-    ## Chain 1: 
-    ## Chain 1: Gradient evaluation took 2.5e-05 seconds
-    ## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.25 seconds.
-    ## Chain 1: Adjust your expectations accordingly!
-    ## Chain 1: 
-    ## Chain 1: 
-    ## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
-    ## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
-    ## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
-    ## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
-    ## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
-    ## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-    ## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-    ## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
-    ## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
-    ## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-    ## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-    ## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
-    ## Chain 1: 
-    ## Chain 1:  Elapsed Time: 0.350817 seconds (Warm-up)
-    ## Chain 1:                0.188193 seconds (Sampling)
-    ## Chain 1:                0.53901 seconds (Total)
-    ## Chain 1: 
-    ## 
-    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 2).
-    ## Chain 2: 
-    ## Chain 2: Gradient evaluation took 1.7e-05 seconds
-    ## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.17 seconds.
-    ## Chain 2: Adjust your expectations accordingly!
-    ## Chain 2: 
-    ## Chain 2: 
-    ## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
-    ## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
-    ## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
-    ## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
-    ## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
-    ## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-    ## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-    ## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
-    ## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
-    ## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-    ## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-    ## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
-    ## Chain 2: 
-    ## Chain 2:  Elapsed Time: 0.432774 seconds (Warm-up)
-    ## Chain 2:                0.369537 seconds (Sampling)
-    ## Chain 2:                0.802311 seconds (Total)
-    ## Chain 2: 
-    ## 
-    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 3).
-    ## Chain 3: 
-    ## Chain 3: Gradient evaluation took 1.8e-05 seconds
-    ## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.18 seconds.
-    ## Chain 3: Adjust your expectations accordingly!
-    ## Chain 3: 
-    ## Chain 3: 
-    ## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
-    ## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
-    ## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
-    ## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
-    ## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
-    ## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-    ## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-    ## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
-    ## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
-    ## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-    ## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-    ## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
-    ## Chain 3: 
-    ## Chain 3:  Elapsed Time: 0.442173 seconds (Warm-up)
-    ## Chain 3:                0.23461 seconds (Sampling)
-    ## Chain 3:                0.676783 seconds (Total)
-    ## Chain 3: 
-    ## 
-    ## SAMPLING FOR MODEL 'd29713d24a31c0a529f235cfe9de0b12' NOW (CHAIN 4).
-    ## Chain 4: 
-    ## Chain 4: Gradient evaluation took 2.4e-05 seconds
-    ## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.24 seconds.
-    ## Chain 4: Adjust your expectations accordingly!
-    ## Chain 4: 
-    ## Chain 4: 
-    ## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
-    ## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
-    ## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
-    ## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
-    ## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
-    ## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-    ## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-    ## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
-    ## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
-    ## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-    ## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-    ## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
-    ## Chain 4: 
-    ## Chain 4:  Elapsed Time: 0.594425 seconds (Warm-up)
-    ## Chain 4:                1.01005 seconds (Sampling)
-    ## Chain 4:                1.60448 seconds (Total)
-    ## Chain 4:
-
-``` r
+m_dw <- lm(m_8 ~ m_5, data = diversity_wide)
+m_dw2 <- lm(m_11 ~ m_5, data = diversity_wide)
 summary(m_dw)
 ```
 
-    ##  Family: gaussian 
-    ##   Links: mu = identity; sigma = identity 
-    ## Formula: m_8 ~ m_5 + (1 | year) + (1 | refuge) 
-    ##    Data: diversity_wide (Number of observations: 119) 
-    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
-    ##          total post-warmup samples = 4000
     ## 
-    ## Group-Level Effects: 
-    ## ~refuge (Number of levels: 40) 
-    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.27      0.06     0.15     0.40 1.00      859     1205
+    ## Call:
+    ## lm(formula = m_8 ~ m_5, data = diversity_wide)
     ## 
-    ## ~year (Number of levels: 3) 
-    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.11      0.15     0.00     0.51 1.01      870      761
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -1.43869 -0.24339 -0.01305  0.28706  0.89531 
     ## 
-    ## Population-Level Effects: 
-    ##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## Intercept     1.56      0.25     1.08     2.09 1.01      797      535
-    ## m_5           0.32      0.09     0.13     0.51 1.00     1160     1384
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  1.27716    0.18584   6.873 3.26e-10 ***
+    ## m_5          0.44637    0.07731   5.773 6.50e-08 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Family Specific Parameters: 
-    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sigma     0.36      0.03     0.30     0.43 1.00      940      553
+    ## Residual standard error: 0.4342 on 117 degrees of freedom
+    ##   (41 observations deleted due to missingness)
+    ## Multiple R-squared:  0.2217, Adjusted R-squared:  0.2151 
+    ## F-statistic: 33.33 on 1 and 117 DF,  p-value: 6.505e-08
+
+``` r
+summary(m_dw2)
+```
+
     ## 
-    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
-    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
-    ## scale reduction factor on split chains (at convergence, Rhat = 1).
+    ## Call:
+    ## lm(formula = m_11 ~ m_5, data = diversity_wide)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.1206 -0.2550  0.0656  0.2547  0.9204 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  2.10955    0.18198  11.592  < 2e-16 ***
+    ## m_5          0.24022    0.07571   3.173  0.00193 ** 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4252 on 117 degrees of freedom
+    ##   (41 observations deleted due to missingness)
+    ## Multiple R-squared:  0.07923,    Adjusted R-squared:  0.07136 
+    ## F-statistic: 10.07 on 1 and 117 DF,  p-value: 0.001928
