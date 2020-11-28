@@ -1,6 +1,12 @@
 Preliminary analysis
 ================
 
+## Summary
+
+  - Diversity changes over the year. Diversity is the highest at the end
+    of the wet season and the lowest at the beginning of the wet season.
+    Surprisingly,
+
 ## Question 1
 
 Does aquatic food diversity changes throughout the year? We hypothesise
@@ -43,11 +49,11 @@ season refuges in the landscape to mix.
 
 ![](report_files/figure-gfm/diversity-over-year-1.png)<!-- -->
 
-*Figure 1: Density distribution of the mean alpha-diversity over the
-year. February and March are predominantly in the dry season. Dots
-indicate the median of the distribution and lines indicate the 66 and
-95% credible intervals. Shannon diversity values have been standardised
-for eight replicates for each sampling occasion.*
+*Figure 1: Distribution of the mean alpha-diversity over the year.
+February and March are predominantly in the dry season. Dots indicate
+the median of the distribution and lines indicate the 66 and 95%
+credible intervals. Shannon diversity values have been standardised for
+eight replicates for each sampling occasion.*
 
   - When looking at the random effects, we found that the variability in
     alpha diversity across refuges was very likely (with a 95%
@@ -68,16 +74,44 @@ diversity in the wet season?
 
 ### Methods
 
-  - Used a Bayesian regression to test whether dive diversity across the
-    year. We included year, and refuge nested inside refuge type as
-    random effects with varying intercept. To account for uneven
-    sampling in smaller sites we included the (log) number of replicates
-    in each sampling occasion an offset.
+  - Used a Bayesian regression to test whether the Shannon diversity
+    index at the end of the dry season (May) is related to the diversity
+    at the beginning of the wet season (August). As in the previous
+    model, we included year and the refuge identity nested inside refuge
+    type as random effects. For year we calculated a random intercept
+    and for refuge and refuge-category we calculated random slopes and
+    intercept. To account for uneven sampling in smaller sites we
+    included the (log) number of replicates in each sampling occasion an
+    offset.
+  - Used data from 2013, 2014, and 2015 for which we had samples both
+    during the dry and the wet season and removed occasions in which the
+    refuge was completely dry and therefore the Shannon diversity index
+    in May was zero.
+
+### Results
+
+  - The R<sup>2</sup> of the model was between 0.42 and 0.64 (95%
+    probability) which indicates that the model was able to account for
+    a substantial proportion of the variation in alpha diversity.
+  - We found that there is almost certain that there is a positive
+    association between the Shannon diversity index in May, at the end
+    of the dry season, and the index in August, at the beginning of the
+    wet season (*p* = 0.009).
+  - This relationship between May’s and August’s diversity was
+    maintained across years, refuge types, and even individual refuges
+    (Supp. Figure 2).
+
+![](report_files/figure-gfm/drywet-relationship-1.png)<!-- -->
+
+*Figure 2: Predicted mean relationship between Shannon diversity index
+in May and August. Shaded areas indicate the 66 and 95% credible
+intervals. Shannon diversity values have been standardised for eighr
+replicates in each sampling occasion.*
 
 ## Question 3
 
 Which environmental factors drive the changes in community composition
-and potential decrease in species abbundance/richness between start and
+and potential decrease in species abundance/richness between start and
 end of dry season?
 
 ## Supplementary figures
@@ -109,3 +143,31 @@ ref_data %>%
 ```
 
 ![](report_files/figure-gfm/adiversity-random-figure-1.png)<!-- -->
+
+``` r
+ref_data <- model_dry_wet %>%
+  posterior_samples() %>%
+  as.data.frame() %>%
+  sample_frac(0.1) %>%
+  select(starts_with("r_")) %>%
+  pivot_longer(everything()) %>%
+  mutate(random_effect = stringr::str_extract(name, ".+(?=\\[)"),
+         name = str_extract(name, "(?<=\\[).+(?=\\])"),
+         name = if_else(str_detect(name, "_"),
+                        str_extract(name, "(?<=_).+"),
+                        name),
+         name = snakecase::to_sentence_case(name)) %>%
+  mutate(name = fct_reorder(name, value, .desc = T), 
+         random_effect = fct_reorder(random_effect, value, 
+                                     function(x){median(abs(x))}, 
+                                     .desc = T))
+
+ref_data %>%
+  ggplot(aes(y = name, x = value)) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  stat_pointinterval() +
+  facet_grid(random_effect ~ ., scales = "free", space = "free") +
+  theme_minimal()
+```
+
+![](report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
