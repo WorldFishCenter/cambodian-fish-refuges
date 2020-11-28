@@ -44,6 +44,7 @@ analysis_plan <- drake_plan(
   occasion_covariates = get_occasion_covariates(occasion_info),
   refuge_covariates = get_refuge_covariates(refuge_info),
   model_alpha_diversity = fit_alpha_diversity_model(catch_info, occasion_covariates, refuge_covariates),
+  model_dry_wet = fit_dry_wet_model(catch_info, occasion_covariates, refuge_covariates),
   prelim_report = target(rmarkdown::render(knitr_in("notebooks/report.Rmd"))),
 )
 

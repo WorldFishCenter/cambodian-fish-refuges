@@ -196,3 +196,29 @@ fit_alpha_diversity_model <- function(catch_info, occasion_covariates, refuge_co
       cores = 4,
       save_pars = save_pars(all = TRUE))
 }
+
+fit_dry_wet_model <- function(catch_info, occasion_covariates, refuge_covariates){
+
+  require(dplyr)
+  require(brms)
+
+  model_data <- catch_info %>%
+    add_replicates_in_occasion(standard = FALSE) %>%
+    get_diversity(transform_fun = "log1p") %>%
+    left_join(occasion_covariates) %>%
+    pivot_wider(id_cols = c(refuge, year, n_samples),
+                names_from = month_s,
+                values_from = diversity_alpha) %>%
+    left_join(refuge_covariates) %>%
+    filter(m_5 != 0)
+
+  brm(formula = brmsformula(m_8 ~
+                              m_5 +
+                              offset(log(n_samples)) +
+                              (m_5 |category_name / cfr_name) +
+                              (1 | year)),
+      data = model_data,
+      iter = 5000,
+      cores = 4,
+      save_pars = save_pars(all = TRUE))
+}
