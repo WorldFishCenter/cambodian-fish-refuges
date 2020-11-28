@@ -69,8 +69,8 @@ change_matrices <- catch_full %>%
 
 combinations <- list(
   `2.5` = c("2", "5"), 
-  `2.8` = c("2", "8"), 
-  `2.11` = c("2", "11")
+  `5.8` = c("5", "8"), 
+  `5.11` = c("5", "11")
 )
 
 type <-  list(presence_absence = TRUE, abundance = FALSE)
@@ -85,7 +85,7 @@ tbi <- cross2(combinations, type) %>%
   })
 
 type_combinations <- cross2(combinations, type) %>%
-  map_df(~tibble(comparison = as.numeric(.[[1]][2]), 
+  map_df(~tibble(comparison = paste(.[[1]][1], .[[1]][2], collapse = "."), 
                  pa_tr = .[[2]]), .id = "type")
 
 tbi_df <- tbi %>%
