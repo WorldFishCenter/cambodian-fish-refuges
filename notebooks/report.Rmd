@@ -313,6 +313,12 @@ list(b = "b", c = "c") %>%
   labs(y = "Relative importance")
 ```
 
+```{r}
+model_exploration$b@objects[[1]] %>% summary()
+model_exploration$c@objects[[1]] %>% summary()
+```
+
+
 * On the factors that explain the dissimiarlities in community composition we found
 
 ## Supplementary figures

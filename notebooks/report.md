@@ -172,6 +172,82 @@ significant at the 0.05 level are shown in a darker shade.*
 
 ![](report_files/figure-gfm/tbi-var-plot-1.png)<!-- -->
 
+``` r
+model_exploration$b@objects[[1]] %>% summary()
+```
+
+    ## Linear mixed-effects model fit by REML
+    ##  Data: data 
+    ##        AIC      BIC    logLik
+    ##   414.4944 441.5897 -197.2472
+    ## 
+    ## Random effects:
+    ##  Formula: ~1 | year_s
+    ##         (Intercept) Residual
+    ## StdDev:   0.4436276 1.268556
+    ## 
+    ## Fixed effects: as.formula(x) 
+    ##                                  Value Std.Error  DF   t-value p-value
+    ## (Intercept)                 -1.4923010 0.6258698 109 -2.384363  0.0188
+    ## type_inlet_outletEarth       0.6297808 0.3296374 109  1.910526  0.0587
+    ## type_inlet_outletnone        1.8802652 0.5118842 109  3.673223  0.0004
+    ## type_inlet_outletWater Gate  0.1668414 0.3239381 109  0.515041  0.6076
+    ## large_water_bodyTRUE         0.7601575 0.2882434 109  2.637207  0.0096
+    ## shapeRectangle               0.7927702 0.4914729 109  1.613050  0.1096
+    ## shapeSinuous                 1.1449943 0.6117313 109  1.871728  0.0639
+    ## other_animal_m2TRUE         -0.6229174 0.2750170 109 -2.265014  0.0255
+    ##  Correlation: 
+    ##                             (Intr) typ__E typ_n_ ty__WG l__TRU shpRct shpSns
+    ## type_inlet_outletEarth      -0.333                                          
+    ## type_inlet_outletnone       -0.454  0.312                                   
+    ## type_inlet_outletWater Gate -0.177  0.457  0.239                            
+    ## large_water_bodyTRUE        -0.325 -0.046  0.216 -0.298                     
+    ## shapeRectangle              -0.833  0.143  0.356  0.002  0.270              
+    ## shapeSinuous                -0.566  0.116  0.225 -0.178  0.008  0.695       
+    ## other_animal_m2TRUE         -0.260  0.033  0.077 -0.204  0.079  0.190  0.187
+    ## 
+    ## Standardized Within-Group Residuals:
+    ##         Min          Q1         Med          Q3         Max 
+    ## -2.87300137 -0.60088500 -0.07117423  0.71502353  2.03836874 
+    ## 
+    ## Number of Observations: 119
+    ## Number of Groups: 3
+
+``` r
+model_exploration$c@objects[[1]] %>% summary()
+```
+
+    ## Linear mixed-effects model fit by REML
+    ##  Data: data 
+    ##        AIC     BIC    logLik
+    ##   424.2826 443.436 -205.1413
+    ## 
+    ## Random effects:
+    ##  Formula: ~1 | year_s
+    ##         (Intercept) Residual
+    ## StdDev:   0.1493117 1.362758
+    ## 
+    ## Fixed effects: as.formula(x) 
+    ##                             Value Std.Error  DF   t-value p-value
+    ## (Intercept)            -2.2190761 0.6444536 112 -3.443345  0.0008
+    ## channel_typeconcrete   -1.4471818 0.5431139 112 -2.664601  0.0088
+    ## channel_typeearth      -0.5558923 0.4792490 112 -1.159924  0.2485
+    ## lwb_depth_dry_m         0.6980431 0.3227061 112  2.163092  0.0327
+    ## illegal_fishing_m5TRUE  0.5856378 0.3408787 112  1.718024  0.0886
+    ##  Correlation: 
+    ##                        (Intr) chnnl_typc chnnl_typr lwb___
+    ## channel_typeconcrete   -0.600                             
+    ## channel_typeearth      -0.729  0.795                      
+    ## lwb_depth_dry_m        -0.694  0.017      0.092           
+    ## illegal_fishing_m5TRUE -0.184 -0.016     -0.030      0.184
+    ## 
+    ## Standardized Within-Group Residuals:
+    ##         Min          Q1         Med          Q3         Max 
+    ## -2.95998799 -0.61669248  0.08103988  0.73491165  1.85997944 
+    ## 
+    ## Number of Observations: 119
+    ## Number of Groups: 3
+
   - On the factors that explain the dissimiarlities in community
     composition we found
 
@@ -231,4 +307,4 @@ ref_data %>%
   theme_minimal()
 ```
 
-![](report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
