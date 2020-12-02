@@ -144,13 +144,7 @@ pca_analysis <- occasion_info %>%
   magrittr::set_rownames(.$refuge) %>%
   dplyr::select(-refuge) %>% 
   FactoMineR::PCA(quali.sup = 14:17, quanti.sup = 18:23, graph = F)
-```
 
-    ## Warning in FactoMineR::PCA(., quali.sup = 14:17, quanti.sup = 18:23, graph =
-    ## F): Missing values are imputed by the mean of the variable: you should use the
-    ## imputePCA function of the missMDA package
-
-``` r
 factoextra::fviz_pca_ind(pca_analysis, habillage = "category_name", addEllipses = T)
 ```
 
@@ -228,10 +222,72 @@ factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "occasion", add
 
 ``` r
 factoextra::fviz_pca_ind(season_pca, geom = "", habillage = "year", addEllipses = T, axes = 3:4)
+FactoInvestigate::Investigate(season_pca)
 ```
+
+    ## -- creation of the .Rmd file (time spent : 0s) --
+    ## 
+    ## -- detection of outliers (time spent : 0.07s) --
+    ## 0 outlier(s) terminated 
+    ## 
+    ## -- analysis of the inertia (time spent : 0.13s) --
+    ## 4 component(s) carrying information : total inertia of 60% 
+    ## 
+    ## -- components description (time spent : 3.24s) --
+    ## plane 1:2 
+    ## plane 3:4 
+    ## 
+    ## -- classification (time spent : 5.16s) --
+    ## 3 clusters 
+    ## 
+    ## -- annexes writing (time spent : 5.76s) --
+    ## 
+    ## -- saving data (time spent : 6.27s) --
+    ## 
+    ## -- outputs compilation (time spent : 6.27s) --
 
 ![](seasonality_files/figure-gfm/unnamed-chunk-2-8.png)<!-- -->
 
+    ## File path:  /home/rstudio/cambodian-fish-refuges/notebooks/Investigate.html 
+    ## -- task completed (time spent : 12.87s) --
+    ## This interpretation of the results was carried out automatically, 
+    ## it cannot match the quality of a personal interpretation
+
+Looks like we can focus on a few variables only: aquatic plant area,
+gauge\_start, water\_temp, phosphate and brush\_park
+
+## Now comparing variables from the dry season alone
+
 ``` r
-# FactoInvestigate::Investigate(season_pca)
+oc <- occasion_info %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date), 
+         season = if_else(month %in% c(2,5), "dry", "wet"), 
+         across(c("month", "year"), as.character)) %>%
+  select(occasion, year, month, season, aquatic_plant_area, gauge_start, water_temp, phosphate, brush_park, refuge) %>%
+  distinct() %>%
+  filter(season == "dry")
+
+oc_m2 <- oc %>%
+  filter(month == "2")
+
+oc_m5 <- oc %>%
+  filter(month == "5")
+
+ocd <- full_join(oc_m2, oc_m5, by = c("refuge", "year"), suffix = c("_m2", "_m5"))
+
+dry_s_pca <- ocd %>%
+  select(where(is.numeric)) %>%
+  FactoMineR::PCA()
 ```
+
+![](seasonality_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->![](seasonality_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+
+``` r
+# FactoInvestigate::Investigate(dry_s_pca)
+```
+
+There is a strong correlation between the occasion variables at the
+beginning and the end of the season so no need to use both. There seem
+to be a bit of a difference between gauge start and water temp so these
+could be included as the difference as well.

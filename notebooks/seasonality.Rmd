@@ -109,6 +109,36 @@ factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "season", addEl
 factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "month", addEllipses = T)
 factoextra::fviz_pca_ind(season_pca, geom = "point", habillage = "occasion", addEllipses = T, axes = 3:4)
 factoextra::fviz_pca_ind(season_pca, geom = "", habillage = "year", addEllipses = T, axes = 3:4)
-# FactoInvestigate::Investigate(season_pca)
+FactoInvestigate::Investigate(season_pca)
 ```
 
+Looks like we can focus on a few variables only: aquatic plant area, gauge_start, water_temp, phosphate and brush_park
+
+## Now comparing variables from the dry season alone
+
+```{r}
+oc <- occasion_info %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date), 
+         season = if_else(month %in% c(2,5), "dry", "wet"), 
+         across(c("month", "year"), as.character)) %>%
+  select(occasion, year, month, season, aquatic_plant_area, gauge_start, water_temp, phosphate, brush_park, refuge) %>%
+  distinct() %>%
+  filter(season == "dry")
+
+oc_m2 <- oc %>%
+  filter(month == "2")
+
+oc_m5 <- oc %>%
+  filter(month == "5")
+
+ocd <- full_join(oc_m2, oc_m5, by = c("refuge", "year"), suffix = c("_m2", "_m5"))
+
+dry_s_pca <- ocd %>%
+  select(where(is.numeric)) %>%
+  FactoMineR::PCA()
+
+# FactoInvestigate::Investigate(dry_s_pca)
+```
+
+There is a strong correlation between the occasion variables at the beginning and the end of the season so no need to use both. There seem to be a bit of a difference between gauge start and water temp so these could be included as the difference as well. 
