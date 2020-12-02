@@ -36,6 +36,7 @@ notebooks_plan <- drake_plan(
   correspondence_nb = target(rmarkdown::render(knitr_in("notebooks/correspondence-analysis.Rmd"))),
   diversity_nb = target(rmarkdown::render(knitr_in("notebooks/diversity.Rmd"))),
   beta_diversity_nb = target(rmarkdown::render(knitr_in("notebooks/beta-diversity-index.Rmd"))),
+  refuge_nb = target(rmarkdown::render(knitr_in("notebooks/refuge-info.Rmd"))),
   readme = target(rmarkdown::render(knitr_in("README.Rmd"))),
 )
 
