@@ -5,9 +5,6 @@ output:
     html_preview: true
 ---
 
-## Summary
-
-* Diversity changes over the year. Diversity is the highest at the end of the wet season and the lowest at the beginning of the wet season. Surprisingly, 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7, warning = F)
@@ -20,7 +17,7 @@ library(ggdist)
 
 ## Question 1
 
-Does aquatic food  diversity changes throughout the year? We hypothesise diversity is the lowest in May, at the end of the dry season, and the highest on November, at the end of the wet season, when fields are usually flooded and there is potential for species from multiple dry season refuges in the landscape to mix. 
+Does aquatic food diversity changes throughout the year? We hypothesise diversity is the lowest in May, at the end of the dry season, and the highest on November, at the end of the wet season, when fields are usually flooded and there is potential for species from multiple dry season refuges in the landscape to mix. 
 
 ### Methods
 
@@ -112,6 +109,7 @@ Does the diversity at the end of the dry season actually influences the diversit
 
 ### Methods
 
+- Calculated the Shannon diversity index of (log) species abundance for each refuge and occasion as above.
 - Used a Bayesian regression to test whether the Shannon diversity index at the end of the dry season (May) is related to the diversity at the beginning of the wet season (August). As in the previous model, we included year and the refuge identity nested inside refuge type as random effects. For year we calculated a random intercept and for refuge and refuge-category we calculated random slopes and intercept. To account for uneven sampling in smaller sites we included the (log) number of replicates in each sampling occasion an offset. 
 - Used data from 2013, 2014, and 2015 for which we had samples both during the dry and the wet season and removed occasions in which the refuge was completely dry and therefore the Shannon diversity index in May was zero. 
 
@@ -162,11 +160,160 @@ m5_samples %>%
   # geom_line(aes(group = sample), alpha = 0.1)
 ```
 
-*Figure 2: Predicted mean relationship between Shannon diversity index in May and August. Shaded areas indicate the 66 and 95% credible intervals. Shannon diversity values have been standardised for eighr replicates in each sampling occasion.*
+*Figure 2: Predicted mean relationship between Shannon diversity index in May and August. Shaded areas indicate the 66 and 95% credible intervals. Shannon diversity values have been standardised for eight replicates in each sampling occasion.*
 
 ## Question 3
 
-Which environmental factors drive the changes in community composition and potential decrease in species abundance/richness between start and end of dry season?
+How does community composition changes within the dry season? Are there factors that explain the differences?
+
+### Methods
+
+- Added number of individuals for each species across replicates within a sampling occasion together. 
+- Standardised the number of individuals counted in order to directly compare sites with differing number of replicates. 
+- Calculated temporal beta-diversity index (TBI) between the sites-species matrix in February and May for each of the three years when sampling occurred. 
+- We calculated two TBI versions one that account for presence/absence of species and another that also account for species abundance. 
+- Used a Bayesian test to compare the mean TBI for these two versions. Specifically we used a multivariate framework in which the response variables were the dissimilarities due to gains and those due to losses. We calculated a random intercept for year and random intercepts for refuge and refuge type. Differences were modelled using a Beta distribution. 
+- Performed multiple paired t-tests for the differences in abundances observed in February and May. We discarded species that do not differ in the date prior to calculation. Used 9999 permutations to calculate the p-values. We corrected permutation p-values for multiple testing using the Holm method. 
+
+### Results
+
+```{r, echo = F, message=FALSE}
+drake::loadd(model_tbi_abu_comp)
+
+h4 <- hypothesis(model_tbi_abu_comp, class = NULL,
+           hypothesis = c("b_bstnd_pa_trTRUE < 0", 
+                          "b_cstnd_pa_trTRUE < 0", 
+                          "b_bstnd_Intercept > b_cstnd_Intercept",
+                          "b_bstnd_Intercept + b_bstnd_pa_trTRUE - b_cstnd_Intercept - b_cstnd_Intercept > 0"))
+
+h4_c <- h4$hypothesis$Post.Prob %>% subtract(1, .) %>% format.pval(digits = 1, eps = 1/10000)
+
+newdata <- expand_grid(
+    pa_tr = c(T, F)) %>%
+  mutate(Var2 = colnames(provideDimnames(rbind(1:nrow(.), 1))))
+
+mtbia_samples <- model_tbi_abu_comp %>%
+  posterior_epred(newdata,
+    re_formula = NA
+    ) %>%
+  as.data.frame.table() %>%
+  left_join(newdata) %>%
+  dplyr::rename(Estimate = Freq, sample = Var1) 
+
+d_samples <- mtbia_samples %>%
+  group_by(sample, Var2, pa_tr) %>%
+  summarise(Estimate = sum(Estimate)) %>%
+  mutate(Var3 = "d")
+
+b_prop <- mtbia_samples %>%
+  pivot_wider(id_cols = c(sample, pa_tr), names_from = Var3, values_from = Estimate) %>%
+  mutate(percentage_losses = bstnd / (bstnd + cstnd)) %>% 
+  split(.$pa_tr) %>%
+  map(~quantile(.$percentage_losses, probs = c(0.025, 0.5, 0.975)))
+
+d_ci <- filter(d_samples, Var3 == "d") %>%
+  split(.$pa_tr) %>%
+  map(~quantile(.$Estimate, probs = c(0.025, 0.5, 0.975)))
+
+ # was `r round(d_ci[[2]][2], 2)` (`r round(d_ci[[2]][1], 2)`, `r round(d_ci[[2]][3], 2)`) when communities are compared using presence/absence data, and 
+```
+
+- Even though the diversity of the communities in February and March is not significantly different (Question 2) the *composition* of the communities in these months appears to be quite distinct. When using abundance data, the mean community dissimilarity (measured as percentage difference), which ranges between 0 (for two identical communities) and 1 (for completely different communities), was `r round(d_ci[[1]][2], 2)` (`r round(d_ci[[1]][1], 2)`-`r round(d_ci[[1]][3], 2)`; 95% credible intervals).
+- These dissimilarities were primarily driven by losses rather than gains (*p* = `r h4_c[3]`). In fact, losses account for `r scales::percent(b_prop[[1]][2])` (`r scales::percent(b_prop[[1]][1])`-`r scales::percent(b_prop[[1]][3])`) of the total dissimilarity. 
+- We found that the dissimilarities are larger when using abundance data were higher than when using occurrence data (*p* = `r h4_c[1]`). Nevertheless, the dissimilarity when using occurrence data was still substantial at `r round(d_ci[[2]][2], 2)` (`r round(d_ci[[2]][1], 2)`, `r round(d_ci[[2]][3], 2)`). This indicates, that changes are not only driven by a reduction in species abundances, but also by a reduction in the species present in May compared to February. 
+
+```{r tbi-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
+mtbia_samples %>%
+  bind_rows(d_samples) %>%
+  mutate(pa_tr = if_else(pa_tr, "presence-absence", "abundance"),
+         Var3 = case_when(Var3 == "bstnd" ~ "losses", 
+                          Var3 == "cstnd" ~ "gains", 
+                          TRUE ~ "total")) %>%
+  ggplot(aes(y = Estimate, x = pa_tr)) +
+  stat_pointinterval(.width = c(.66, .95)) +
+  facet_wrap(Var3 ~ . , ncol = 1)  +
+  coord_flip(ylim = c(0,1)) +
+  theme_minimal() +
+  theme(axis.title.y = element_blank(), 
+        panel.grid.major.y = element_blank(), 
+        legend.position = "none") +
+  labs(y = "Dissimilarity (% difference)")
+```
+
+*Figure 3: Changes in community composition in February, at the start of the dry season, and May, towards the end of the dry season. Changes are measured using the Temporal beta-diversity index which is composed by dissimilarities due to species gains and species losses.*
+
+- We found that only a handful species show consistent changes between February and May across refuges and years. This is likely due to the dramatic differences in community composition across refuges and over time.
+
+```{r species-diff-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
+drake::loadd(species_changes)
+
+species_changes %>%
+  mutate(p_value_perm_adjust = p.adjust(p_value_perm), 
+         type = paste(type, "\nspecies")) %>%
+  filter(p_value_perm_adjust <= 0.66) %>%
+  mutate(x = species_name, 
+         x = stringr::str_sub(x, 1, 25),
+         x = fct_reorder(x, mean_diff, .desc = T)) %>%
+  ggplot(aes(x = x, y = mean_diff)) +
+  geom_col(aes(fill =  p_value_perm_adjust < 0.05)) +
+  geom_hline(yintercept = 0, linetype = 1, size = 0.25) +
+  coord_flip() +
+  scale_x_discrete(position = "top") +
+  scale_fill_brewer(palette = "Greys") +
+  facet_grid(type ~ ., scales = "free", space = "free", switch = "y") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        panel.grid.major.y = element_blank(), 
+        axis.text.y = element_text(face = "italic"),
+        axis.title.y = element_blank()) +
+  labs(y = "Mean difference (individuals)")
+```
+
+*Figure 4: Species that showed a consistent decrease between February and May across all refuges and years. Only species that show a likely decrease (p < 0.33) are shown. Species in which the decrease was significant at the 0.05 level are shown in a darker shade.*
+
+```{r tbi-var-plot, fig.height = 4.5, fig.width = 8, echo = F, message=FALSE}
+drake::loadd(model_exploration)
+
+refuge_variables <- c("type_inlet_outlet", "large_water_body", 
+                        "channel_type", "shape", "lwb_depth_dry_m",
+                        "lwb_area_wet_ha", "no_channel",
+                        "rf_area_connected_in_dry_season_ha", "dist_market", "category_name")
+
+extract_coef_weights <- function(x){
+  x %>%
+    split(.$model) %>%
+    map_dfr(~ tibble(model = .$model, 
+                     var = stringr::str_extract_all(.$model, "(?<=\\+ )\\w+")[[1]], 
+                     aic = .$aic, 
+                     weight = .$weight)) %>%
+    group_by(var) %>%
+    summarise(weight = sum(weight))
+}
+  
+list(b = "b", c = "c") %>%
+  map(~ glmulti::weightable(model_exploration[[.]])) %>%
+  map_dfr(extract_coef_weights, .id = "component") %>%
+  arrange(component, weight) %>%
+  mutate(var_type = if_else(var %in% refuge_variables, "refuge variable", "occasion variable"),
+         var = snakecase::to_sentence_case(var), 
+         var = fct_reorder(var, weight), 
+         component = case_when(component == "b" ~ "species loss", 
+                               component == "c" ~ "species gain"), 
+         component = fct_inorder(component)) %>%
+  ggplot(aes(x = var, y = weight)) +
+  geom_col(aes(fill = var_type)) +
+  scale_fill_brewer(palette = "Greys") +
+  facet_wrap(component ~.) +
+  coord_flip() +
+  theme_minimal() +
+  theme(panel.grid.major.y = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) +
+  labs(y = "Relative importance")
+```
+
+* On the factors that explain the dissimiarlities in community composition we found
 
 ## Supplementary figures
 

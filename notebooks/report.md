@@ -1,12 +1,6 @@
 Preliminary analysis
 ================
 
-## Summary
-
-  - Diversity changes over the year. Diversity is the highest at the end
-    of the wet season and the lowest at the beginning of the wet season.
-    Surprisingly,
-
 ## Question 1
 
 Does aquatic food diversity changes throughout the year? We hypothesise
@@ -74,6 +68,8 @@ diversity in the wet season?
 
 ### Methods
 
+  - Calculated the Shannon diversity index of (log) species abundance
+    for each refuge and occasion as above.
   - Used a Bayesian regression to test whether the Shannon diversity
     index at the end of the dry season (May) is related to the diversity
     at the beginning of the wet season (August). As in the previous
@@ -105,14 +101,79 @@ diversity in the wet season?
 
 *Figure 2: Predicted mean relationship between Shannon diversity index
 in May and August. Shaded areas indicate the 66 and 95% credible
-intervals. Shannon diversity values have been standardised for eighr
+intervals. Shannon diversity values have been standardised for eight
 replicates in each sampling occasion.*
 
 ## Question 3
 
-Which environmental factors drive the changes in community composition
-and potential decrease in species abundance/richness between start and
-end of dry season?
+How does community composition changes within the dry season? Are there
+factors that explain the differences?
+
+### Methods
+
+  - Added number of individuals for each species across replicates
+    within a sampling occasion together.
+  - Standardised the number of individuals counted in order to directly
+    compare sites with differing number of replicates.
+  - Calculated temporal beta-diversity index (TBI) between the
+    sites-species matrix in February and May for each of the three years
+    when sampling occurred.
+  - We calculated two TBI versions one that account for presence/absence
+    of species and another that also account for species abundance.
+  - Used a Bayesian test to compare the mean TBI for these two versions.
+    Specifically we used a multivariate framework in which the response
+    variables were the dissimilarities due to gains and those due to
+    losses. We calculated a random intercept for year and random
+    intercepts for refuge and refuge type. Differences were modelled
+    using a Beta distribution.
+  - Performed multiple paired t-tests for the differences in abundances
+    observed in February and May. We discarded species that do not
+    differ in the date prior to calculation. Used 9999 permutations to
+    calculate the p-values. We corrected permutation p-values for
+    multiple testing using the Holm method.
+
+### Results
+
+  - Even though the diversity of the communities in February and March
+    is not significantly different (Question 2) the *composition* of the
+    communities in these months appears to be quite distinct. When using
+    abundance data, the mean community dissimilarity (measured as
+    percentage difference), which ranges between 0 (for two identical
+    communities) and 1 (for completely different communities), was 0.64
+    (0.4-0.98; 95% credible intervals).
+  - These dissimilarities were primarily driven by losses rather than
+    gains (*p* = 0.03). In fact, losses account for 72% (48%-84%) of the
+    total dissimilarity.
+  - We found that the dissimilarities are larger when using abundance
+    data were higher than when using occurrence data (*p* = \<1e-04).
+    Nevertheless, the dissimilarity when using occurrence data was still
+    substantial at 0.51 (0.31, 0.85). This indicates, that changes are
+    not only driven by a reduction in species abundances, but also by a
+    reduction in the species present in May compared to February.
+
+![](report_files/figure-gfm/tbi-plot-1.png)<!-- -->
+
+*Figure 3: Changes in community composition in February, at the start of
+the dry season, and May, towards the end of the dry season. Changes are
+measured using the Temporal beta-diversity index which is composed by
+dissimilarities due to species gains and species losses.*
+
+  - We found that only a handful species show consistent changes between
+    February and May across refuges and years. This is likely due to the
+    dramatic differences in community composition across refuges and
+    over time.
+
+![](report_files/figure-gfm/species-diff-plot-1.png)<!-- -->
+
+*Figure 4: Species that showed a consistent decrease between February
+and May across all refuges and years. Only species that show a likely
+decrease (p \< 0.33) are shown. Species in which the decrease was
+significant at the 0.05 level are shown in a darker shade.*
+
+![](report_files/figure-gfm/tbi-var-plot-1.png)<!-- -->
+
+  - On the factors that explain the dissimiarlities in community
+    composition we found
 
 ## Supplementary figures
 
@@ -170,4 +231,4 @@ ref_data %>%
   theme_minimal()
 ```
 
-![](report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
