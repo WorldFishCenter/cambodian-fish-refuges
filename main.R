@@ -45,6 +45,14 @@ analysis_plan <- drake_plan(
   refuge_covariates = get_refuge_covariates(refuge_info),
   model_alpha_diversity = fit_alpha_diversity_model(catch_info, occasion_covariates, refuge_covariates),
   model_dry_wet = fit_dry_wet_model(catch_info, occasion_covariates, refuge_covariates),
+  catch_full = get_catch_full_info(catch_info, occasion_covariates),
+  change_matrices = get_change_matrices(catch_full),
+  tbi = calculate_tbi(change_matrices, catch_full),
+  species_changes = get_species_changes(change_matrices, species_info),
+  model_tbi_abu_comp = fit_tbi_abu_comp(tbi, refuge_covariates),
+  occasion_covariates_beta = get_occasion_covariates_beta(occasion_info),
+  refuge_covariates_beta = get_refuge_covariates_beta(refuge_info),
+  model_exploration = select_model_tbi(tbi, occasion_covariates_beta, refuge_covariates_beta),
   prelim_report = target(rmarkdown::render(knitr_in("notebooks/report.Rmd"))),
 )
 
