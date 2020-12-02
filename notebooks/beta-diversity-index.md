@@ -75,37 +75,7 @@ tbi <- cross2(combinations, type) %>%
                     test.t.perm = T, save.BC = T, 
                     method = "%difference", pa.tr = x[[2]]) 
   })
-```
 
-    ## Registered S3 methods overwritten by 'adegraphics':
-    ##   method         from
-    ##   biplot.dudi    ade4
-    ##   kplot.foucart  ade4
-    ##   kplot.mcoa     ade4
-    ##   kplot.mfa      ade4
-    ##   kplot.pta      ade4
-    ##   kplot.sepan    ade4
-    ##   kplot.statis   ade4
-    ##   scatter.coa    ade4
-    ##   scatter.dudi   ade4
-    ##   scatter.nipals ade4
-    ##   scatter.pco    ade4
-    ##   score.acm      ade4
-    ##   score.mix      ade4
-    ##   score.pca      ade4
-    ##   screeplot.dudi ade4
-
-    ## Registered S3 method overwritten by 'spdep':
-    ##   method   from
-    ##   plot.mst ape
-
-    ## Registered S3 methods overwritten by 'adespatial':
-    ##   method             from       
-    ##   plot.multispati    adegraphics
-    ##   print.multispati   ade4       
-    ##   summary.multispati ade4
-
-``` r
 type_combinations <- cross2(combinations, type) %>%
   map_df(~tibble(comparison = paste(.[[1]][1], .[[1]][2], collapse = "."), 
                  pa_tr = .[[2]]), .id = "type")
@@ -173,7 +143,7 @@ Looking at specific species:
 
 ``` r
 sp_tbi <- change_matrices %$%
-  adespatial::tpaired.krandtest(mat1 = `2`, mat2 = `5`, 
+  adespatial::tpaired.krandtest(mat1 = `5`, mat2 = `2`, 
                                 nperm = 99, list.all = T) %$%
   as.data.frame(t.tests) %>%
   rownames_to_column() %>%

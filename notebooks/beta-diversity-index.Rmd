@@ -136,9 +136,8 @@ tbi_df %>%
 Looking at specific species: 
 
 ```{r}
-
 sp_tbi <- change_matrices %$%
-  adespatial::tpaired.krandtest(mat1 = `2`, mat2 = `5`, 
+  adespatial::tpaired.krandtest(mat1 = `5`, mat2 = `2`, 
                                 nperm = 99, list.all = T) %$%
   as.data.frame(t.tests) %>%
   rownames_to_column() %>%
