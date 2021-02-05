@@ -53,7 +53,10 @@ analysis_plan <- drake_plan(
   model_tbi_abu_comp = fit_tbi_abu_comp(tbi, refuge_covariates),
   occasion_covariates_beta = get_occasion_covariates_beta(occasion_info),
   refuge_covariates_beta = get_refuge_covariates_beta(refuge_info),
-  model_exploration = select_model_tbi(tbi, occasion_covariates_beta, refuge_covariates_beta),
+  tbi_model_data = get_tbi_model_data(tbi, occasion_covariates_beta, refuge_covariates_beta),
+  tbi_model = model_tbi(tbi_model_data),
+  species_change_model = model_species_changes(species_changes),
+  # model_exploration = select_model_tbi(tbi, occasion_covariates_beta, refuge_covariates_beta),
   prelim_report = target(rmarkdown::render(knitr_in("notebooks/report.Rmd"))),
 )
 

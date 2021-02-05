@@ -168,8 +168,8 @@ select_model_tbi <- function(tbi, occasion_covariates_beta, refuge_covariates_be
   md <- tbi %>%
     left_join(refuge_covariates_beta) %>%
     left_join(occasion_covariates_beta) %>%
-    mutate(across(c(b_stnd, c_stnd), ~if_else(. == 0, 0.001, .))) %>%
-    mutate(across(c(b_stnd, c_stnd),qlogis)) %>%
+    mutate(across(c(b_stnd, c_stnd, d), ~if_else(. == 0, 0.001, .))) %>%
+    mutate(across(c(b_stnd, c_stnd, d), qlogis)) %>%
     filter(comparison == "2 5" , !pa_tr)
 
   # formulas = list(b = formula(b_stnd ~ type_inlet_outlet + large_water_body +
@@ -221,7 +221,93 @@ select_model_tbi <- function(tbi, occasion_covariates_beta, refuge_covariates_be
                       marginality = T,
                       fitfunction = "lme"))
 
+  drr <- do.call("glmulti",
+                 list(y = d ~ type_inlet_outlet + large_water_body +
+                        channel_type + shape + lwb_depth_dry_m +
+                        lwb_area_wet_ha + no_channel +
+                        rf_area_connected_in_dry_season_ha + dist_market +
+                        aquatic_plant_area_m2 + gauge_start_m2 +
+                        water_temp_m2 + phosphate_m2 + brush_park_m2 +
+                        illegal_fishing_m5 + other_animal_m2 +
+                        water_bird_m2 + water_temp_diff + gauge_start_diff,
+                      random = list(~ 1 | year_s),
+                      data = md,
+                      level = 1,
+                      method = "g",
+                      marginality = T,
+                      fitfunction = "lme"))
+
+  list(b = brr, c = crr, d = drr)
+}
 
 
-  list(b = brr, c = crr)
+get_tbi_model_data <- function(tbi, occasion_covariates_beta, refuge_covariates_beta){
+
+  suppressPackageStartupMessages({
+    require(tidyverse)
+  })
+
+  tbi %>%
+    left_join(refuge_covariates_beta) %>%
+    left_join(occasion_covariates_beta) %>%
+    filter(comparison == "2 5" , !pa_tr) %>%
+    mutate(across(c(where(is.numeric) & !b_stnd:year_s), scale),
+           across(where(is.character), as.factor),
+           across(where( ~ is.factor(.x) && "None" %in% levels(.x)), ~fct_relevel(., "None")),
+           across(where(is.logical), ~ if_else(.x, "yes", "no")))
+}
+
+model_tbi <- function(tbi_model_data){
+
+  suppressPackageStartupMessages({
+    require(brms)
+  })
+
+  brm(mvbind(b_stnd, c_stnd) ~ type_inlet_outlet + large_water_body +
+        channel_type + shape + lwb_depth_dry_m +
+        lwb_area_wet_ha + no_channel +
+        rf_area_connected_in_dry_season_ha + dist_market +
+        aquatic_plant_area_m2 + gauge_start_m2 +
+        water_temp_m2 + phosphate_m2 + brush_park_m2 +
+        illegal_fishing_m5 + other_animal_m2 +
+        water_bird_m2 + water_temp_diff + gauge_start_diff +
+        (1 | year_s) +
+        (1 | category_name / refuge),
+      family = "zero_inflated_beta",
+      data = tbi_model_data,
+      cores = 4,
+      iter = 5000,
+      control = list(adapt_delta = 0.99))
+
+
+
+}
+
+
+model_species_changes <- function(species_changes){
+
+  suppressPackageStartupMessages({
+    require(brms)
+  })
+
+  smd <- species_changes %>%
+    dplyr::mutate(mean_diff = scale(mean_diff))
+
+  m <- brm(t ~ species_type_simple + (1 | species),
+           # family = student,
+           data = smd,
+           cores = 4,
+           iter = 5000,
+           control = list(adapt_delta = 0.99))
+
+  m2 <- brm(mean_diff ~ species_type_simple + (1 | species),
+           # family = student,
+           data = smd,
+           cores = 4,
+           iter = 5000,
+           control = list(adapt_delta = 0.99))
+
+  list(t_values = m, mean_diff = m2)
+
+
 }
