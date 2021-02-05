@@ -13,6 +13,7 @@ library(magrittr)
 library(tidyverse)
 library(brms)
 library(ggdist)
+library(tidybayes)
 ```
 
 ## Question 1
@@ -173,7 +174,7 @@ How does community composition changes within the dry season? Are there factors 
 - Calculated temporal beta-diversity index (TBI) between the sites-species matrix in February and May for each of the three years when sampling occurred. 
 - We calculated two TBI versions one that account for presence/absence of species and another that also account for species abundance. 
 - Used a Bayesian test to compare the mean TBI for these two versions. Specifically we used a multivariate framework in which the response variables were the dissimilarities due to gains and those due to losses. We calculated a random intercept for year and random intercepts for refuge and refuge type. Differences were modelled using a Beta distribution. 
-- Performed multiple paired t-tests for the differences in abundances observed in February and May. We discarded species that do not differ in the date prior to calculation. Used 9999 permutations to calculate the p-values. We corrected permutation p-values for multiple testing using the Holm method. 
+- Performed multiple paired t-tests for the differences in abundances observed in February and May. We discarded species that do not differ in the date prior to calculation. Used 9999 permutations to calculate the p-values. We corrected permutation p-values for multiple testing using the Holm method.
 
 ### Results
 
@@ -221,6 +222,8 @@ d_ci <- filter(d_samples, Var3 == "d") %>%
 - Even though the diversity of the communities in February and March is not significantly different (Question 2) the *composition* of the communities in these months appears to be quite distinct. When using abundance data, the mean community dissimilarity (measured as percentage difference), which ranges between 0 (for two identical communities) and 1 (for completely different communities), was `r round(d_ci[[1]][2], 2)` (`r round(d_ci[[1]][1], 2)`-`r round(d_ci[[1]][3], 2)`; 95% credible intervals).
 - These dissimilarities were primarily driven by losses rather than gains (*p* = `r h4_c[3]`). In fact, losses account for `r scales::percent(b_prop[[1]][2])` (`r scales::percent(b_prop[[1]][1])`-`r scales::percent(b_prop[[1]][3])`) of the total dissimilarity. 
 - We found that the dissimilarities are larger when using abundance data were higher than when using occurrence data (*p* = `r h4_c[1]`). Nevertheless, the dissimilarity when using occurrence data was still substantial at `r round(d_ci[[2]][2], 2)` (`r round(d_ci[[2]][1], 2)`, `r round(d_ci[[2]][3], 2)`). This indicates, that changes are not only driven by a reduction in species abundances, but also by a reduction in the species present in May compared to February. 
+- We found that only a handful species show consistent changes between February and May across refuges and years. This is likely due to the dramatic differences in community composition across refuges and over time.
+- However there were differences between species types. Black species were more likely to be lost than grey and white species. 
 
 ```{r tbi-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
 mtbia_samples %>%
@@ -237,89 +240,102 @@ mtbia_samples %>%
   theme(axis.title.y = element_blank(), 
         panel.grid.major.y = element_blank(), 
         legend.position = "none") +
-  labs(y = "Dissimilarity (% difference)")
-```
+  labs(y = "Dissimilarity (% difference)", 
+       tag = "a)")
 
-*Figure 3: Changes in community composition in February, at the start of the dry season, and May, towards the end of the dry season. Changes are measured using the Temporal beta-diversity index which is composed by dissimilarities due to species gains and species losses.*
+drake::loadd(species_change_model)
+msc <- species_change_model$t_values
 
-- We found that only a handful species show consistent changes between February and May across refuges and years. This is likely due to the dramatic differences in community composition across refuges and over time.
+labels <- tibble(
+  x = 0, y = 0.7, 
+  label = c("   → gains   ", "   losses ←   "), 
+  hjust = c(0, 1)
+)
 
-```{r species-diff-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
-drake::loadd(species_changes)
-
-species_changes %>%
-  mutate(p_value_perm_adjust = p.adjust(p_value_perm), 
-         type = paste(type, "\nspecies")) %>%
-  filter(p_value_perm_adjust <= 0.66) %>%
-  mutate(x = species_name, 
-         x = stringr::str_sub(x, 1, 25),
-         x = fct_reorder(x, mean_diff, .desc = T)) %>%
-  ggplot(aes(x = x, y = mean_diff)) +
-  geom_col(aes(fill =  p_value_perm_adjust < 0.05)) +
-  geom_hline(yintercept = 0, linetype = 1, size = 0.25) +
-  coord_flip() +
-  scale_x_discrete(position = "top") +
-  scale_fill_brewer(palette = "Greys") +
-  facet_grid(type ~ ., scales = "free", space = "free", switch = "y") +
+add_fitted_draws(data_frame(species_type_simple = unique(msc$data$species_type_simple)),
+                 msc, re_formula = NA) %>%
+  ungroup() %>%
+  mutate(species_type_simple = fct_reorder(species_type_simple, .value)) %>%
+  ggplot(aes(x = .value, y = species_type_simple)) +
+  geom_vline(xintercept = 0, linetype = 2, size = 0.25) +
+  stat_pointinterval() +
+  geom_text(data = labels, aes(label = label, x = x, y = y, hjust = hjust), fontface = "italic") +
   theme_minimal() +
-  theme(legend.position = "none", 
-        panel.grid.major.y = element_blank(), 
-        axis.text.y = element_text(face = "italic"),
-        axis.title.y = element_blank()) +
-  labs(y = "Mean difference (individuals)")
+  labs(x = "t-value", 
+       y = "Species type", 
+       tag = "b)")
+
 ```
 
-*Figure 4: Species that showed a consistent decrease between February and May across all refuges and years. Only species that show a likely decrease (p < 0.33) are shown. Species in which the decrease was significant at the 0.05 level are shown in a darker shade.*
+*Figure 3: Changes in community composition in February, at the start of the dry season, and May, towards the end of the dry season. (a) Changes are measured using the Temporal beta-diversity index which is composed by dissimilarities due to species gains and species losses. (b) By the end of the dry season, "black" species are more likely to encounter losses than "grey" and "white" species.*
 
-```{r tbi-var-plot, fig.height = 4.5, fig.width = 8, echo = F, message=FALSE}
-drake::loadd(model_exploration)
+- We found that channel shape of the ponds and type of channels and inlets were associated with the gains and losses of species during the dry season. 
+- Large water bodies were mode likely to loose species. 
 
-refuge_variables <- c("type_inlet_outlet", "large_water_body", 
-                        "channel_type", "shape", "lwb_depth_dry_m",
-                        "lwb_area_wet_ha", "no_channel",
-                        "rf_area_connected_in_dry_season_ha", "dist_market", "category_name")
+```{r tbi-factors-plot, fig.height=7, fig.width=8, echo = F, message= F}
+drake::loadd(tbi_model)
 
-extract_coef_weights <- function(x){
-  x %>%
-    split(.$model) %>%
-    map_dfr(~ tibble(model = .$model, 
-                     var = stringr::str_extract_all(.$model, "(?<=\\+ )\\w+")[[1]], 
-                     aic = .$aic, 
-                     weight = .$weight)) %>%
-    group_by(var) %>%
-    summarise(weight = sum(weight))
-}
+find_base_level <- function(variable, level, data){
+  if(is.na(level)) return(NA)
   
-list(b = "b", c = "c") %>%
-  map(~ glmulti::weightable(model_exploration[[.]])) %>%
-  map_dfr(extract_coef_weights, .id = "component") %>%
-  arrange(component, weight) %>%
-  mutate(var_type = if_else(var %in% refuge_variables, "refuge variable", "occasion variable"),
-         var = snakecase::to_sentence_case(var), 
-         var = fct_reorder(var, weight), 
-         component = case_when(component == "b" ~ "species loss", 
-                               component == "c" ~ "species gain"), 
-         component = fct_inorder(component)) %>%
-  ggplot(aes(x = var, y = weight)) +
-  geom_col(aes(fill = var_type)) +
-  scale_fill_brewer(palette = "Greys") +
-  facet_wrap(component ~.) +
-  coord_flip() +
+  data[, as.character(variable)] %>%
+    as.factor() %>%
+    levels() %>%
+    first()
+}
+
+find_pd_position <- function(value, upper, lower){
+  range <- c(lower, upper)
+  same_side <- range[sign(range) == sign(value)] 
+  same_side[which.max(abs(same_side))]
+}
+
+gather_draws(tbi_model, `b_.*`,  regex = T) %>%
+  mutate(pd = sum((sign(median(.value)) * .value) > 0)/n(),
+         pd = scales::percent(pd, accuracy = 0.1), 
+         pd = paste0(" ", pd, " ")) %>%
+  group_by(pd, .add = T) %>%
+  median_qi(.width = c(0.66, 0.9)) %>%
+  ungroup() %>%
+  filter(str_detect(.variable, "Intercept", negate = T)) %>%
+  mutate(response = str_extract(.variable, "^b_([a-z]+)_"),
+         level = str_extract(.variable, "[A-Z].+$"),
+         variable = str_remove(.variable, response),
+         variable = if_else(is.na(level),
+                            variable,
+                            str_remove(variable, level)),
+         variable = fct_reorder(variable, abs(.value), .desc = T),
+         level = fct_reorder(level, abs(.value))) %>%
+  group_by(.variable, response) %>%
+  arrange(.width) %>% 
+  mutate(pd_position = find_pd_position(last(.value), last(.upper), last(.lower))) %>% 
+  rowwise() %>%
+  mutate(base_level = find_base_level(variable, level, tbi_model$data),
+         var_level = if_else(is.na(level),
+                             as.character(variable),
+                             paste0(variable, " (", level, " vs. ", base_level, ")")), 
+         response = case_when(response == "b_bstnd_" ~ "Species Loss", 
+                              TRUE ~ "Species Gains")) %>%
+  ggplot(aes(x = .value, y = var_level)) +
+  geom_vline(xintercept = 0, linetype = 2, width = 0.25) +
+  geom_pointinterval(aes(xmin = .lower, xmax = .upper)) +
+  geom_text(aes(label = pd, x = pd_position), stat = "unique", 
+            hjust = "outward", size = 3.2, colour = "grey30") +
+  scale_x_continuous(expand = expansion(mult = 0.2)) +
   theme_minimal() +
-  theme(panel.grid.major.y = element_blank(), 
-        axis.title.y = element_blank(), 
-        legend.position = "bottom", 
-        legend.title = element_blank()) +
-  labs(y = "Relative importance")
+  facet_grid(rows = vars(variable),
+             cols = vars(response),
+             scales = "free",
+             space = "free") +
+  theme(strip.text.y = element_blank(),
+        strip.placement = "outside",
+        panel.spacing.y = unit(0, "mm"),
+        panel.spacing.x = unit(5, "mm"))
 ```
 
-```{r}
-model_exploration$b@objects[[1]] %>% summary()
-model_exploration$c@objects[[1]] %>% summary()
-```
+*Figure 4: Effect of selected factors on species gains and losses during the dry season. Dots indicate the median of the distribution and lines the 66 and 90% credible intervals. The percentages indicate the probability of direction, this is, the probability that the specified factor has a positive (or negative) effect in the response variables.*
 
 
-* On the factors that explain the dissimiarlities in community composition we found
 
 ## Supplementary figures
 
@@ -376,3 +392,81 @@ ref_data %>%
   theme_minimal()
 ```
 
+
+
+
+```{r species-diff-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
+drake::loadd(species_changes)
+
+species_changes %>%
+  mutate(p_value_perm_adjust = p.adjust(p_value_perm), 
+         type = paste(type, "\nspecies")) %>%
+  filter(p_value_perm_adjust <= 0.66) %>%
+  mutate(x = species_name, 
+         x = stringr::str_sub(x, 1, 25),
+         x = fct_reorder(x, mean_diff, .desc = T)) %>%
+  ggplot(aes(x = x, y = mean_diff)) +
+  geom_col(aes(fill =  p_value_perm_adjust < 0.05)) +
+  geom_hline(yintercept = 0, linetype = 1, size = 0.25) +
+  coord_flip() +
+  scale_x_discrete(position = "top") +
+  scale_fill_brewer(palette = "Greys") +
+  facet_grid(type ~ ., scales = "free", space = "free", switch = "y") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        panel.grid.major.y = element_blank(), 
+        axis.text.y = element_text(face = "italic"),
+        axis.title.y = element_blank()) +
+  labs(y = "Mean difference (individuals)")
+
+```
+
+*Species that showed a consistent decrease between February and May across all refuges and years. Only species that show a likely decrease (p < 0.33) are shown. Species in which the decrease was significant at the 0.05 level are shown in a darker shade.*
+
+```{r tbi-var-plot, fig.height = 4.5, fig.width = 8, echo = F, message=FALSE, include=F, eval = F}
+drake::loadd(model_exploration)
+
+refuge_variables <- c("type_inlet_outlet", "large_water_body", 
+                        "channel_type", "shape", "lwb_depth_dry_m",
+                        "lwb_area_wet_ha", "no_channel",
+                        "rf_area_connected_in_dry_season_ha", "dist_market", "category_name")
+
+extract_coef_weights <- function(x){
+  x %>%
+    split(.$model) %>%
+    map_dfr(~ tibble(model = .$model, 
+                     var = stringr::str_extract_all(.$model, "(?<=\\+ )\\w+")[[1]], 
+                     aic = .$aic, 
+                     weight = .$weight)) %>%
+    group_by(var) %>%
+    summarise(weight = sum(weight))
+}
+  
+list(b = "b", c = "c", d = "d") %>%
+  map(~ glmulti::weightable(model_exploration[[.]])) %>%
+  map_dfr(extract_coef_weights, .id = "component") %>%
+  arrange(component, weight) %>%
+  mutate(var_type = if_else(var %in% refuge_variables, "refuge variable", "occasion variable"),
+         var = snakecase::to_sentence_case(var), 
+         var = fct_reorder(var, weight), 
+         component = case_when(component == "b" ~ "species loss", 
+                               component == "c" ~ "species gain", 
+                               TRUE ~ "all"), 
+         component = fct_inorder(component)) %>%
+  ggplot(aes(x = var, y = weight)) +
+  geom_col(aes(fill = var_type)) +
+  scale_fill_brewer(palette = "Greys") +
+  facet_wrap(component ~.) +
+  coord_flip() +
+  theme_minimal() +
+  theme(panel.grid.major.y = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "bottom", 
+        legend.title = element_blank()) +
+  labs(y = "Relative importance")
+```
+
+```{r, include = F, eval = F}
+model_exploration$b@objects[[1]] %>% summary()
+model_exploration$c@objects[[1]] %>% summary()
+```
