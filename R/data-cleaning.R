@@ -37,11 +37,11 @@ clean_community_data <- function(community_data_raw, species_to_exclude){
     # Encoding of characters
     dplyr::mutate_if(is.character, fix_encoding) %>%
     # Site info column contents
-    dplyr::mutate(channel_type = dplyr::case_when(channel_type == 1 ~ "earth",
-                                                  channel_type == 0 ~ "concrete",
-                                                  channel_type == 3 ~ "both",
+    dplyr::mutate(channel_type = dplyr::case_when(channel_type == 1 ~ "Earth",
+                                                  channel_type == 0 ~ "None",
+                                                  channel_type == 3 ~ "Earth & Concrete",
                                                   TRUE ~ NA_character_),
-                  type_inlet_outlet = tidyr::replace_na(type_inlet_outlet, "none"),
+                  type_inlet_outlet = tidyr::replace_na(type_inlet_outlet, "None"),
                   large_water_body = large_water_body == 1) %>%
     # Occasion info column contents
     dplyr::mutate_at(dplyr::vars("illegal_fishing",
