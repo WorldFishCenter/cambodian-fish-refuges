@@ -1,0 +1,180 @@
+---
+title: "Results"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidybayes)
+library(patchwork)
+```
+
+```{r}
+drake::loadd(model_tbi_abu_comp)
+
+tbi_pred_data <- tibble(
+  category_name = unique(model_tbi_abu_comp$data$category_name), 
+  pa_tr = FALSE
+)
+
+tbi_predictions <- tbi_pred_data %>%
+  add_fitted_draws(model_tbi_abu_comp, re_formula = NA) 
+
+tbi_means <- tbi_predictions %>%
+  group_by(.category, .add = T) %>%
+  mean_qi() %>%
+  mutate(across(where(is.numeric), ~round(., digits = 2))) %>%
+  ungroup() %>%
+  arrange(.category, category_name, .value) %>%
+  select(-pa_tr, -.row, -.point, -.interval)
+
+tbi_means
+```
+
+```{r}
+hypothesis(model_tbi_abu_comp, 
+           c("b_bstnd_Intercept > b_cstnd_Intercept", 
+           "b_bstnd_Intercept + b_bstnd_category_nameCommunitypondwithinagriculturallandpronetoflood > b_cstnd_Intercept +  b_cstnd_category_nameCommunitypondwithinagriculturallandpronetoflood", 
+           "b_bstnd_Intercept + b_bstnd_category_nameDemarcatedareainlargerwaterbody > b_cstnd_Intercept +  b_cstnd_category_nameDemarcatedareainlargerwaterbody", 
+           "b_bstnd_Intercept + b_bstnd_category_nameReservoirforirrigationinuplandarea > b_cstnd_Intercept + b_cstnd_category_nameReservoirforirrigationinuplandarea"), 
+           class = NULL) 
+```
+
+```{r}
+drake::readd(tbi_category_plot)
+```
+
+```{r}
+drake::loadd(species_changes)
+
+species_changes %>%
+  filter(p_value_param_adjust < 0.05)
+
+species_changes %>%
+  filter(p_value_param <= 0.05, p_value_param_adjust >= 0.05)
+```
+
+```{r}
+drake::loadd(species_change_model)
+
+scmt <- species_change_model$t_values
+
+hypothesis(scmt, c("Intercept < 0", 
+                   "species_type_simpleGrey + Intercept < 0", 
+                   "species_type_simpleWhite + Intercept < 0",
+                   "species_type_simpleOther + Intercept < 0", 
+                   "species_type_simpleGrey < species_type_simpleWhite", 
+                   "species_type_simpleWhite > 0"))
+
+```
+
+```{r}
+drake::readd(species_groups_changes_plot)
+```
+
+```{r}
+drake::loadd(tbi_model)
+
+tbi_model_abu <- tbi_model[[1]]
+bayes_R2(tbi_model_abu)
+
+hypothesis(tbi_model_abu, 
+           c("bstnd_type_inlet_outletCulvert < 0", 
+             "bstnd_type_inlet_outletEarth < 0", 
+             "bstnd_type_inlet_outletWaterGate < 0", 
+             "bstnd_type_inlet_outletCulvert < bstnd_type_inlet_outletEarth",
+             "bstnd_type_inlet_outletCulvert < bstnd_type_inlet_outletWaterGate",
+             "cstnd_type_inlet_outletCulvert > 0", 
+             "cstnd_type_inlet_outletEarth > 0", 
+             "cstnd_type_inlet_outletWaterGate > 0", 
+             "cstnd_type_inlet_outletCulvert > cstnd_type_inlet_outletEarth",
+             "cstnd_type_inlet_outletCulvert > cstnd_type_inlet_outletWaterGate"))
+```
+
+
+```{r}
+
+tbi_pred_data_sites <- model_tbi_abu_comp$data %>%
+  select(category_name, cfr_name) %>%
+  distinct() %>%
+  mutate(pa_tr = FALSE)
+
+tbi_predictions_sites <- tbi_pred_data_sites %>%
+  add_fitted_draws(model_tbi_abu_comp, re_formula = ~ (1 | cfr_name)) %>%
+  add_b_cstnd()
+
+# tbi_predictions_sites %>%
+#   group_by(.category, .add = T) %>%
+#   point_interval(.width = c(0.66, 0.95)) %>%
+#   group_by(category_name, cfr_name, pa_tr) %>%
+#   pivot_wider(names_from = .category, 
+#               values_from = c(.value, .upper, .lower)) %>% 
+#   ggplot() +
+#   geom_point(aes(x = .value_cstnd, y = .value_bstnd)) +
+  
+  # geom_pointinterval(aes(x = .value_cstnd, 
+  #                        xmin = .lower_cstnd, 
+  #                        xmax = .upper_cstnd, 
+  #                        width = .width, 
+  #                        y = .value_bstnd), 
+  #                    point_size = 1, 
+  #                    interval_size_domain = c(0.5,12), 
+  #                    interval_size_range = c(0.25, 1)) +
+  # geom_pointinterval(aes(y = .value_bstnd, 
+  #                        ymin = .lower_bstnd, 
+  #                        ymax = .upper_bstnd, 
+  #                        width = .width, 
+  #                        x = .value_cstnd), 
+  #                    point_size = 1, 
+  #                    interval_size_domain = c(0.5,12), 
+  #                    interval_size_range = c(0.25, 1)) +
+  # coord_cartesian(expand = F)
+
+plot_tbi_site <- tbi_predictions_sites %>%
+  group_by(.draw, .add = TRUE) %>%
+  mutate(total_value = .value[.category == "bstnd"]) %>%
+  ungroup() %>%
+  filter(.category != "total") %>%
+  mutate(cfr_name = fct_reorder(cfr_name, total_value, .fun = mean, 
+                                .desc = F), 
+         .category = lengthen_difference_type(.category)) %>%
+  ggplot(aes(y = cfr_name, x = .value, group = .category, shape = .category)) +
+  stat_gradientinterval(.width = c(.66, .95), 
+                        point_size = 1, 
+                        interval_size_domain = c(0.5,12), 
+                        interval_size_range = c(0.25, 1),
+                        position = position_dodge(width = 1), 
+                        point_interval = mean_qi)  +
+  # facet_wrap(.category ~ ., scales = "free_y", ncol = 1)  +
+  scale_x_continuous(labels = scales::percent_format()) +
+  # coord_cartesian(ylim = c(0,1)) +
+  scale_shape_manual(values = c(17,15))+
+  theme_minimal(base_size = 8) +
+  theme(legend.title = element_blank(), 
+        axis.title = element_text(size = 7), 
+        strip.text = element_markdown(), 
+        # axis.text.x = element_text(angle = 90, hjust = 1), 
+        axis.title.y = element_blank(),
+        legend.position = "none") +
+  labs(x = "Mean % difference", 
+       y = "Species type", 
+       tag = "b)")
+
+plot_tbi_site
+
+```
+
+```{r}
+(plot_tbi + 
+   plot_species_groups + 
+   plot_layout(ncol = 2, widths = c(5.5,1))) / plot_tbi_site + plot_layout(heights = c(1.75,1), )
+
+ggsave("figures/fig_1.png", width = 17, height = 14, units = "cm", dpi = 300)
+plot_tbi + plot_tbi_site + plot_layout(ncol = 1, heights = c(2.5,5))
+
+ggsave(plot_tbi, filename = "figures/fig_1.png", width = 17/2, height = 7, units = "cm", dpi = 300)
+
+ggsave(filename = "figures/fig_2.png", plot = plot_species_groups, width = 17/2, height = 2.3, units = "cm", dpi = 300)
+```
+
