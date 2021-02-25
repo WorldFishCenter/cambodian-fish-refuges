@@ -105,7 +105,7 @@ fit_tbi_abu_comp <- function(tbi, refuge_covariates){
     mutate(across(where(is.numeric), ~if_else(. == 0, 0.0001, .))) %>%
     left_join(refuge_covariates)
 
-  brm(mvbind(b_stnd, c_stnd) ~ pa_tr + (1 |category_name / cfr_name) + (1 | year_s),
+  brm(mvbind(b_stnd, c_stnd, d) ~ pa_tr*category_name + (1 | cfr_name) + (1 | year_s),
       data = d, family = Beta, cores = 4, iter = 5000,
       control = list(adapt_delta = 0.99))
 }
