@@ -51,7 +51,7 @@ calculate_tbi <- function(change_matrices, catch_full){
     map(function(x){
       adespatial::TBI(mat1 = change_matrices[[x[[1]][1]]],
                       mat2 = change_matrices[[x[[1]][2]]],
-                      nperm = 99, test.BC = TRUE,
+                      nperm = 9999, test.BC = TRUE,
                       test.t.perm = T, save.BC = T,
                       method = "%difference", pa.tr = x[[2]])
     })
