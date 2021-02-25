@@ -61,10 +61,23 @@ analysis_plan <- drake_plan(
 )
 
 
+figures_plan <- drake_plan(
+  tbi_category_plot = plot_tbi_category(model_tbi_abu_comp),
+  target(ggsave("figures/fig_tbi-category.png", tbi_category_plot,
+                width = 17/2, height = 7, units = "cm", dpi = 320)),
+  species_groups_changes_plot = plot_species_groups_changes(species_change_model, species_changes),
+  target(ggsave("figures/fig_sp-groups-changes.png", species_groups_changes_plot,
+                width = 17/2, height = 2.4, units = "cm", dpi = 320)),
+  tbi_factors_plot = plot_tbi_factors(tbi_model),
+  target(ggsave("figures/fig-conditional-tbi.png", tbi_factors_plot,
+                width = 17, height = 5.2, units = "cm", dpi = 320))
+)
+
 full_plan <- rbind(script_variables,
                    data_preprocessing,
                    notebooks_plan,
-                   analysis_plan)
+                   analysis_plan,
+                   figures_plan)
 
 # Execute plan ------------------------------------------------------------
 

@@ -311,3 +311,337 @@ model_species_changes <- function(species_changes){
 
 
 }
+
+shorten_category_name <- function(category_name){
+  case_when(
+    category_name ==
+      "Reservoir for irrigation in upland area" ~
+      "Irrigation reservoir",
+    category_name ==
+      "Community pond within agricultural land not prone to flood" ~
+      "Not-flooding pond",
+    category_name ==
+      "Community pond within agricultural land prone to flood" ~
+      "Flooding pond",
+    category_name ==
+      "Demarcated area in larger water body" ~ "Large water body")
+}
+
+lengthen_difference_type <- function(.category){
+  case_when(
+    .category == "bstnd" ~
+      "Dissimilarity  due  to  **losses** in per-species  abundance",
+    .category == "cstnd" ~
+      "Dissimilarity due to **gains** in per-species abundance",
+    TRUE ~
+      "**Total** dissimilarity")
+}
+
+plot_tbi_category <- function(model_tbi_abu_comp){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+    library(tidybayes)
+    library(ggdist)
+    library(ggtext)
+  })
+
+  tbi_pred_data <- tibble(
+    category_name = unique(model_tbi_abu_comp$data$category_name),
+    pa_tr = FALSE
+  )
+
+  tbi_predictions <- tbi_pred_data %>%
+    add_fitted_draws(model_tbi_abu_comp, re_formula = NA)
+
+  tbi_predictions %>%
+    mutate(category_name = shorten_category_name(category_name)) %>%
+    group_by(category_name, pa_tr, .draw) %>%
+    mutate(total_value = .value[.category == "d"]) %>%
+    ungroup() %>%
+    mutate(category_name = fct_reorder(category_name, total_value, .fun = mean),
+           .category = lengthen_difference_type(.category)) %>%
+    ggplot(aes(x = .value, y = category_name, shape = .category, colour = .category)) +
+    stat_gradientinterval(.width = c(.66, .95),
+                          point_size = 1,
+                          interval_size_domain = c(0.5,12),
+                          interval_size_range = c(0.25, 1),
+                          position = position_dodge(width = 1),
+                          point_interval = mean_qi) +
+    facet_wrap(.category ~ ., scales = "free_x", ncol = 1)  +
+    scale_x_continuous(labels = scales::percent_format()) +
+    scale_color_manual(values = c("black", "#1f78b4", "#33a02c"), aesthetics = c("colour", "fill")) +
+    scale_shape_manual(values = c(16, 17, 15))+
+    coord_cartesian(xlim = c(0,1)) +
+    theme_minimal(base_size = 8) +
+    theme(axis.title.y = element_blank(),
+          # panel.grid.major.y = element_blank(),
+          legend.position = "none",
+          legend.title = element_blank(),
+          axis.title = element_text(size = 7),
+          strip.text = element_markdown()) +
+    labs(x = "Mean % difference")
+ }
+
+
+plot_species_groups_changes <- function(species_change_model, species_changes){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+    library(tidybayes)
+    library(ggdist)
+    library(ggtext)
+  })
+
+  msc <- species_change_model$t_values
+
+  labels <- tibble(
+    x = 0, y = 0.1,
+    label = c("  → gains   ", "   losses ←  "),
+    hjust = c(0, 1)
+  )
+
+  add_fitted_draws(tibble(species_type_simple = unique(msc$data$species_type_simple)),
+                                          msc, re_formula = NA, n = 999) %>%
+    ungroup() %>%
+    mutate(species_type_simple = fct_reorder(species_type_simple, .value)) %>%
+    ggplot(aes(x = .value, y = species_type_simple)) +
+    geom_vline(xintercept = 0, linetype = 2, size = 0.25) +
+    geom_point(data = species_changes, aes(x = t), shape = 124, size = 1) +
+    stat_gradientinterval(.width = c(.66, .95),
+                          point_size = 1,
+                          interval_size_domain = c(0.5,12),
+                          interval_size_range = c(0.25, 1),
+                          shape = 16,
+                          point_interval = mean_qi) +
+    geom_text(data = labels, aes(label = label, y = y, x = x, hjust = hjust),
+              fontface = "italic", size = 2.3) +
+    coord_cartesian(clip = "off") +
+    theme_minimal(base_size = 8) +
+    theme(axis.title = element_text(size = 7),
+          axis.title.y = element_blank()) +
+    labs(x = "t-value",
+         y = "Species type")
+
+}
+
+plot_tbi_factors <- function(tbi_model){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+    library(tidybayes)
+    library(ggdist)
+    library(ggtext)
+    library(patchwork)
+  })
+
+  tbi_model_abu <- tbi_model[[1]]
+
+  inlet_type_df <- tibble(type_inlet_outlet = unique(tbi_model_abu$data$type_inlet_outlet),
+                          aquatic_plant_area_m2 = 0,
+                          gauge_start_m5 = 0,
+                          gauge_start_diff = 0,
+                          dist_village = 0,
+                          rf_area_connected_in_wet_season_ha = 0,
+                          no_inlet_outlet = 0,
+                          lwb_area_wet_ha = 0)
+
+  p1 <- add_fitted_draws(inlet_type_df, tbi_model_abu, re_formula = ~ 1) %>%
+    group_by(type_inlet_outlet, .draw) %>%
+    mutate(loss_value = .value[.category == "bstnd"]) %>%
+    ungroup() %>%
+    mutate(.category = lengthen_difference_type(.category),
+           type_inlet_outlet = fct_recode(type_inlet_outlet,
+                                          "No channel" = "None",
+                                          "Earth channel" = "Earth"),
+           type_inlet_outlet = fct_reorder(type_inlet_outlet, loss_value, mean)) %>%
+    ggplot(aes(x = .value, y = type_inlet_outlet, shape = .category,
+               colour = .category)) +
+    stat_gradientinterval(position = position_dodge(width = 0.9),
+                          .width = c(.66, .95),
+                          point_size = 1,
+                          interval_size_domain = c(0.5,12),
+                          interval_size_range = c(0.25, 1),
+                          point_interval = mean_qi) +
+    scale_x_continuous(labels = scales::percent_format()) +
+    scale_shape_manual(values = c(17, 15))+
+    coord_cartesian(xlim = c(0.05,0.75)) +
+    theme_minimal(base_size = 8) +
+    theme(axis.title = element_text(size = 7),
+          axis.title.y = element_blank(),
+          legend.title = element_blank(),
+          legend.text = element_markdown(),
+          legend.position = "bottom") +
+    labs(x = "% difference",
+         y = "Channel type")
+
+  lwb_area_df <- tibble(type_inlet_outlet = "Water Gate",
+                        aquatic_plant_area_m2 = 0,
+                        gauge_start_m5 = 0,
+                        gauge_start_diff = 0,
+                        dist_village = 0,
+                        rf_area_connected_in_wet_season_ha = 0,
+                        no_inlet_outlet = 0,
+                        lwb_area_wet_ha = unique(tbi_model_abu$data$lwb_area_wet_ha))
+
+  lwb_area_df_fitted <- add_fitted_draws(lwb_area_df, tbi_model_abu, re_formula = ~ 1, n = 999) %>%
+    mutate(area = lwb_area_wet_ha *
+             attr(tbi_model_abu$data$lwb_area_wet_ha, "scaled:scale"),
+           area = area +
+             attr(tbi_model_abu$data$lwb_area_wet_ha, "scaled:center"))
+
+  p2 <- lwb_area_df_fitted %>%
+    filter(.category == "bstnd") %>%
+    ggplot(aes(y = .value, x = area, fill = .category, colour = .category)) +
+    stat_lineribbon(aes(alpha = stat(level)),
+                    .width = c(0.05, 0.66, 0.95),
+                    colour = NA,
+                    point_interval = mean_qi) +
+    geom_point(data = tibble(area = unique(lwb_area_df_fitted$area[,1])),
+              aes(y = -Inf, x = area), inherit.aes = F, shape = 124, size = 1) +
+    theme_minimal(base_size = 8) +
+    theme(axis.title = element_text(size = 7),
+          legend.position = "none") +
+    scale_x_continuous(breaks = log1p(c(1, 10, 100, 1000)),
+                       labels = expm1) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_alpha_discrete(range = c(0.1, 1)) +
+    coord_cartesian(ylim = c(0.1, 0.7)) +
+    labs(x = "Water-body area (ha)",
+         y = "% difference")
+
+  rf_area_df <- tibble(type_inlet_outlet = "Water Gate",
+                        aquatic_plant_area_m2 = 0,
+                        gauge_start_m5 = 0,
+                        gauge_start_diff = 0,
+                        dist_village = 0,
+                        rf_area_connected_in_wet_season_ha = unique(tbi_model_abu$data$rf_area_connected_in_wet_season_ha),
+                        no_inlet_outlet = 0,
+                        lwb_area_wet_ha = 0)
+
+  rf_area_df_fitted <- add_fitted_draws(rf_area_df, tbi_model_abu, re_formula = ~ 1, n = 999) %>%
+    mutate(area = rf_area_connected_in_wet_season_ha *
+             attr(tbi_model_abu$data$rf_area_connected_in_wet_season_ha, "scaled:scale"),
+           area = area +
+             attr(tbi_model_abu$data$rf_area_connected_in_wet_season_ha, "scaled:center"))
+
+  p3 <- rf_area_df_fitted %>%
+    filter(.category == "bstnd") %>%
+    ggplot(aes(y = .value, x = area, fill = .category, colour = .category)) +
+    stat_lineribbon(aes(alpha = stat(level)),
+                    .width = c(0.05, 0.66, 0.95),
+                    colour = NA,
+                    point_interval = mean_qi) +
+    geom_point(data = tibble(area = unique(rf_area_df_fitted$area[,1])),
+               aes(y = -Inf, x = area), inherit.aes = F, shape = 124, size = 1) +
+    theme_minimal(base_size = 8) +
+    theme(axis.title = element_text(size = 7),
+          legend.position = "none") +
+    scale_x_continuous(breaks = log1p(c(0, 10, 100, 250, 500, 1000, 2000, 4000)),
+                       labels = expm1) +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_alpha_discrete(range = c(0.1, 1)) +
+    coord_cartesian(ylim = c(0.1, 0.7)) +
+    labs(x = "Rice field area connected\nduring wet season (ha)",
+         y = "% difference")
+
+  p <- ((p1 + p2 + p3) / guide_area() +
+      plot_annotation(tag_levels = 'A', tag_suffix = ".") +
+      plot_layout(guides = "collect", heights = c(10,1))) &
+    scale_color_manual(values = c("#1f78b4", "#33a02c"), aesthetics = c("colour", "fill")) &
+    theme(plot.tag = element_text(size = 7))
+
+  return(p)
+}
+
+# lengthen_variacble_names <- fucntion
+
+plot_tbi_effects <- function(tbi_model){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+    library(tidybayes)
+    library(ggdist)
+    library(ggtext)
+    library(patchwork)
+  })
+
+  tbi_model_abu <- tbi_model[[1]]
+
+  find_base_level <- function(variable, level, data){
+    if(is.na(level)) return(NA)
+
+    data[, as.character(variable)] %>%
+      as.factor() %>%
+      levels() %>%
+      first()
+  }
+
+  find_pd_position <- function(value, upper, lower){
+    range <- c(lower, upper)
+    same_side <- range[sign(range) == sign(value)]
+    same_side[which.max(abs(same_side))]
+  }
+
+  effects_df <- tbi_model_abu %>%
+    gather_draws(`b_.*`,  regex = T, n = 999) %>%
+    mean_qi(.width = c(0.66, 0.95)) %>%
+    ungroup() %>%
+    filter(str_detect(.variable, "Intercept", negate = T)) %>%
+    mutate(response = str_extract(.variable, "^b_([a-z]+)_"),
+           level = str_extract(.variable, "[A-Z].+$"),
+           variable = str_remove(.variable, response),
+           variable = if_else(is.na(level),
+                              variable,
+                              str_remove(variable, level)),
+           variable = fct_reorder(variable, abs(.value), .desc = F),
+           level = fct_reorder(level, abs(.value))) %>%
+    group_by(.variable, response) %>%
+    rowwise() %>%
+    mutate(base_level = find_base_level(variable, level, tbi_model_abu$data),
+           var_level = if_else(is.na(level),
+                               as.character(variable),
+                               paste0(variable, " (", level, " vs. ", base_level, ")")),
+           response = str_replace(response, "^b_([a-z]+)_", "\\1"),
+           response = lengthen_difference_type(response),
+           categorical = !is.na(base_level))
+
+  p1 <- effects_df %>%
+    filter(categorical) %>%
+    ggplot(aes(x = .value, y = var_level, shape = response, colour = response)) +
+    geom_vline(xintercept = 0, linetype = 2, width = 0.25) +
+    geom_pointinterval(aes(xmin = .lower, xmax = .upper),
+                       position = position_dodge(width = 0.75),
+                       point_size = 1,
+                       interval_size_domain = c(0.5,12),
+                       interval_size_range = c(0.25, 1)) +
+    scale_x_continuous(expand = expansion(mult = 0.2)) +
+    theme_minimal(base_size = 8) +
+    theme(legend.position = "none",
+          axis.title.y = element_blank()) +
+    labs(x = "Effect size categorical variables")
+
+  p2 <- effects_df %>%
+    filter(!categorical) %>%
+    ggplot(aes(x = .value, y = variable, shape = response, colour = response)) +
+    geom_vline(xintercept = 0, linetype = 2, width = 0.25) +
+
+    geom_pointinterval(aes(xmin = .lower, xmax = .upper),
+                       position = position_dodge(width = 0.75),
+                       point_size = 1,
+                       interval_size_domain = c(0.5,12),
+                       interval_size_range = c(0.25, 1)) +
+    theme_minimal(base_size = 8) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.text = element_markdown(),
+          legend.direction = "vertical",
+          axis.title.y = element_blank()) +
+    labs(x = "Effect size continuous variables")
+
+  (p1 + p2 + plot_layout(ncol = 1, heights = c(3, 7))) &
+    scale_shape_manual(values = c(17, 15)) &
+    scale_color_manual(values = c("#1f78b4", "#33a02c"), aesthetics = c("colour", "fill"))
+
+  ggsave("figures/tbi-effect-sizes.png", width = 17, height = 10, units = "cm", dpi = 300)
+}
