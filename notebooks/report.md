@@ -139,15 +139,15 @@ factors that explain the differences?
     communities in these months appears to be quite distinct. When using
     abundance data, the mean community dissimilarity (measured as
     percentage difference), which ranges between 0 (for two identical
-    communities) and 1 (for completely different communities), was 0.64
-    (0.4-0.98; 95% credible intervals).
+    communities) and 1 (for completely different communities), was 1.06
+    (0.78-1.41; 95% credible intervals).
   - These dissimilarities were primarily driven by losses rather than
-    gains (*p* = 0.03). In fact, losses account for 72% (48%-84%) of the
+    gains (*p* = 0.05). In fact, losses account for 67% (46%-82%) of the
     total dissimilarity.
   - We found that the dissimilarities are larger when using abundance
-    data were higher than when using occurrence data (*p* = \<1e-04).
+    data were higher than when using occurrence data (*p* = 0.21).
     Nevertheless, the dissimilarity when using occurrence data was still
-    substantial at 0.51 (0.31, 0.85). This indicates, that changes are
+    substantial at 0.96 (0.68, 1.32). This indicates, that changes are
     not only driven by a reduction in species abundances, but also by a
     reduction in the species present in May compared to February.
   - We found that only a handful species show consistent changes between
@@ -157,7 +157,7 @@ factors that explain the differences?
   - However there were differences between species types. Black species
     were more likely to be lost than grey and white species.
 
-![](report_files/figure-gfm/tbi-plot-1.png)<!-- -->![](report_files/figure-gfm/tbi-plot-2.png)<!-- -->
+![](report_files/figure-gfm/tbi-plot-1.png)<!-- -->
 
 *Figure 3: Changes in community composition in February, at the start of
 the dry season, and May, towards the end of the dry season. (a) Changes

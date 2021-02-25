@@ -5,7 +5,6 @@ output:
     html_preview: true
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width = 10, fig.height = 7, warning = F)
 library(ggplot2)
@@ -14,6 +13,8 @@ library(tidyverse)
 library(brms)
 library(ggdist)
 library(tidybayes)
+library(ggtext)
+library(patchwork)
 ```
 
 ## Question 1
@@ -190,7 +191,8 @@ h4 <- hypothesis(model_tbi_abu_comp, class = NULL,
 h4_c <- h4$hypothesis$Post.Prob %>% subtract(1, .) %>% format.pval(digits = 1, eps = 1/10000)
 
 newdata <- expand_grid(
-    pa_tr = c(T, F)) %>%
+    pa_tr = c(T, F), 
+    category_name = unique(model_tbi_abu_comp$data$category_name)) %>%
   mutate(Var2 = colnames(provideDimnames(rbind(1:nrow(.), 1))))
 
 mtbia_samples <- model_tbi_abu_comp %>%
@@ -202,12 +204,12 @@ mtbia_samples <- model_tbi_abu_comp %>%
   dplyr::rename(Estimate = Freq, sample = Var1) 
 
 d_samples <- mtbia_samples %>%
-  group_by(sample, Var2, pa_tr) %>%
+  group_by(sample, Var2, pa_tr, category_name) %>%
   summarise(Estimate = sum(Estimate)) %>%
   mutate(Var3 = "d")
 
 b_prop <- mtbia_samples %>%
-  pivot_wider(id_cols = c(sample, pa_tr), names_from = Var3, values_from = Estimate) %>%
+  pivot_wider(id_cols = c(sample, pa_tr, category_name), names_from = Var3, values_from = Estimate) %>%
   mutate(percentage_losses = bstnd / (bstnd + cstnd)) %>% 
   split(.$pa_tr) %>%
   map(~quantile(.$percentage_losses, probs = c(0.025, 0.5, 0.975)))
@@ -226,21 +228,40 @@ d_ci <- filter(d_samples, Var3 == "d") %>%
 - However there were differences between species types. Black species were more likely to be lost than grey and white species. 
 
 ```{r tbi-plot, fig.height = 2.5, fig.width = 4, echo = F, message=FALSE}
-mtbia_samples %>%
+p1 <- mtbia_samples %>%
   bind_rows(d_samples) %>%
   mutate(pa_tr = if_else(pa_tr, "presence-absence", "abundance"),
-         Var3 = case_when(Var3 == "bstnd" ~ "losses", 
-                          Var3 == "cstnd" ~ "gains", 
-                          TRUE ~ "total")) %>%
-  ggplot(aes(y = Estimate, x = pa_tr)) +
-  stat_pointinterval(.width = c(.66, .95)) +
-  facet_wrap(Var3 ~ . , ncol = 1)  +
-  coord_flip(ylim = c(0,1)) +
-  theme_minimal() +
+         Var3 = case_when(Var3 == "bstnd" ~ "Dissimilarity  due  to  **losses** in  species  abundances", 
+                          Var3 == "cstnd" ~ "Dissimilarity due to **gains** in species abundances", 
+                          TRUE ~ "**Total** dissimilarity"), 
+         # category_name = str_replace(category_name, "Community p", "P"),
+         # category_name = str_wrap(category_name, 25),
+         category_name = fct_recode(category_name, 
+                                    "Irrigation reservoir" = "Reservoir for irrigation in upland area", 
+                                    "Flooding pond" = "Community pond within agricultural land not prone to flood", 
+                                    "Non-flooding pond" = "Community pond within agricultural land prone to flood", 
+                                    "Large water body" = "Demarcated area in larger water body"),
+         category_name = fct_reorder(category_name, Estimate, .fun = max), 
+         total = Var3 == "total") %>%
+  filter(pa_tr == "abundance") %>%
+  ggplot(aes(x = Estimate, y = category_name)) +
+  stat_gradientinterval(.width = c(.66, .95), 
+                        point_size = 1, 
+                        interval_size_domain = c(0.5,12), 
+                        interval_size_range = c(0.25, 1),
+                     position = position_dodge(width = 1)) +
+  facet_wrap(Var3 ~ ., scales = "free_x", ncol = 1)  +
+  # coord_flip() +
+  scale_x_continuous(labels = scales::percent_format()) +
+  coord_cartesian(xlim = c(0,1)) +
+  theme_minimal(base_size = 8) +
   theme(axis.title.y = element_blank(), 
-        panel.grid.major.y = element_blank(), 
-        legend.position = "none") +
-  labs(y = "Dissimilarity (% difference)", 
+        # panel.grid.major.y = element_blank(), 
+        legend.position = "top", 
+        legend.title = element_blank(), 
+        axis.title = element_text(size = 7), 
+        strip.text = element_markdown()) +
+  labs(x = "Mean % difference", 
        tag = "a)")
 
 drake::loadd(species_change_model)
@@ -248,22 +269,31 @@ msc <- species_change_model$t_values
 
 labels <- tibble(
   x = 0, y = 0.7, 
-  label = c("   → gains   ", "   losses ←   "), 
+  label = c("  → gains   ", "   losses ←  "), 
   hjust = c(0, 1)
 )
 
-add_fitted_draws(data_frame(species_type_simple = unique(msc$data$species_type_simple)),
+p2 <- add_fitted_draws(data_frame(species_type_simple = unique(msc$data$species_type_simple)),
                  msc, re_formula = NA) %>%
   ungroup() %>%
   mutate(species_type_simple = fct_reorder(species_type_simple, .value)) %>%
-  ggplot(aes(x = .value, y = species_type_simple)) +
-  geom_vline(xintercept = 0, linetype = 2, size = 0.25) +
-  stat_pointinterval() +
-  geom_text(data = labels, aes(label = label, x = x, y = y, hjust = hjust), fontface = "italic") +
-  theme_minimal() +
-  labs(x = "t-value", 
-       y = "Species type", 
+  ggplot(aes(y = .value, x = species_type_simple)) +
+  geom_hline(yintercept = 0, linetype = 2, size = 0.25) +
+  stat_gradientinterval(.width = c(.66, .95),
+                        point_size = 1, 
+                        interval_size_domain = c(0.5,12), 
+                        interval_size_range = c(0.25, 1)) +
+  geom_text(data = labels, aes(label = label, x = y, y = x, hjust = hjust, angle = 90), fontface = "italic", size = 2.3) +
+  theme_minimal(base_size = 8) +
+  theme(axis.text.x = element_text(angle = 90), 
+        axis.title = element_text(size = 7)) +
+  labs(y = "Mean t-value", 
+       x = "Species type", 
        tag = "b)")
+
+p1 + p2 + plot_layout(widths = c(3.75,1))
+
+# ggsave("figures/fig_1.png", width = 17/3*2, height = 8, units = "cm", dpi = 320)
 
 ```
 
@@ -274,7 +304,8 @@ add_fitted_draws(data_frame(species_type_simple = unique(msc$data$species_type_s
 
 ```{r tbi-factors-plot, fig.height=7, fig.width=8, echo = F, message= F}
 drake::loadd(tbi_model)
-
+tb <- tbi_model
+tbi_model <- tbi_model[[1]]
 find_base_level <- function(variable, level, data){
   if(is.na(level)) return(NA)
   
@@ -290,12 +321,14 @@ find_pd_position <- function(value, upper, lower){
   same_side[which.max(abs(same_side))]
 }
 
-gather_draws(tbi_model, `b_.*`,  regex = T) %>%
+tb %>%
+  map_dfr(~ gather_draws(., `b_.*`,  regex = T), .id = "model") %>%
+  group_by(model, .add = T) %>%
   mutate(pd = sum((sign(median(.value)) * .value) > 0)/n(),
          pd = scales::percent(pd, accuracy = 0.1), 
          pd = paste0(" ", pd, " ")) %>%
-  group_by(pd, .add = T) %>%
-  median_qi(.width = c(0.66, 0.9)) %>%
+  group_by(pd, .add = T) %>% 
+  median_qi(.width = c(0.66, 0.9)) %>% 
   ungroup() %>%
   filter(str_detect(.variable, "Intercept", negate = T)) %>%
   mutate(response = str_extract(.variable, "^b_([a-z]+)_"),
@@ -316,11 +349,13 @@ gather_draws(tbi_model, `b_.*`,  regex = T) %>%
                              paste0(variable, " (", level, " vs. ", base_level, ")")), 
          response = case_when(response == "b_bstnd_" ~ "Species Loss", 
                               TRUE ~ "Species Gains")) %>%
-  ggplot(aes(x = .value, y = var_level)) +
+  ggplot(aes(x = .value, y = var_level, colour = model)) +
   geom_vline(xintercept = 0, linetype = 2, width = 0.25) +
-  geom_pointinterval(aes(xmin = .lower, xmax = .upper)) +
+  geom_pointinterval(aes(xmin = .lower, xmax = .upper), 
+                     position = position_dodge(width = 0.5)) +
   geom_text(aes(label = pd, x = pd_position), stat = "unique", 
-            hjust = "outward", size = 3.2, colour = "grey30") +
+            hjust = "outward", size = 3.2, 
+            position = position_dodge(width = 0.5, )) +
   scale_x_continuous(expand = expansion(mult = 0.2)) +
   theme_minimal() +
   facet_grid(rows = vars(variable),
@@ -334,8 +369,6 @@ gather_draws(tbi_model, `b_.*`,  regex = T) %>%
 ```
 
 *Figure 4: Effect of selected factors on species gains and losses during the dry season. Dots indicate the median of the distribution and lines the 66 and 90% credible intervals. The percentages indicate the probability of direction, this is, the probability that the specified factor has a positive (or negative) effect in the response variables.*
-
-
 
 ## Supplementary figures
 
