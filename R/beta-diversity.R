@@ -154,11 +154,13 @@ get_refuge_covariates_beta <- function(refuge_info){
            channel_type,
            shape,
            type_inlet_outlet,
+           no_inlet_outlet,
            # numerical
            lwb_depth_dry_m,
            lwb_area_wet_ha,
            no_channel,
            rf_area_connected_in_dry_season_ha,
+           rf_area_connected_in_wet_season_ha,
            dist_village,
            dist_market)
 }
@@ -268,23 +270,54 @@ model_tbi <- function(tbi_model_data){
     require(brms)
   })
 
-  brm(mvbind(b_stnd, c_stnd) ~ type_inlet_outlet + large_water_body +
-        channel_type + shape + lwb_depth_dry_m +
-        lwb_area_wet_ha + no_channel +
-        rf_area_connected_in_dry_season_ha + dist_market +
-        aquatic_plant_area_m2 + gauge_start_m2 +
-        water_temp_m2 + phosphate_m2 + brush_park_m2 +
-        illegal_fishing_m5 + other_animal_m2 +
-        water_bird_m2 + water_temp_diff + gauge_start_diff +
-        (1 | year_s) +
-        (1 | category_name / refuge),
-      family = "zero_inflated_beta",
-      data = tbi_model_data,
-      cores = 4,
-      iter = 5000,
-      control = list(adapt_delta = 0.99))
+  # tbi_model_data <- tbi_model_data %>%
+    # dplyr::mutate(no_inlet_outlet = as.character(no_inlet_outlet))
+  #
+  # mg <- gam(b_stnd ~ s(aquatic_plant_area_m2) +
+  #       s(gauge_start_m5) +
+  #       s(gauge_start_diff) +
+  #       dist_village +
+  #       s(rf_area_connected_in_wet_season_ha) +
+  #       no_inlet_outlet +
+  #       type_inlet_outlet +
+  #       s(lwb_area_wet_ha),
+  #     data = dplyr::filter(tbi_model_data, pa_tr == "no"))
 
+  m1 <- brm(mvbind(b_stnd, c_stnd) ~
+              aquatic_plant_area_m2 +
+              gauge_start_m5 +
+              gauge_start_diff +
+              dist_village +
+              rf_area_connected_in_wet_season_ha +
+              # no_inlet_outlet +
+              type_inlet_outlet +
+              lwb_area_wet_ha +
+              (1 | year_s) +
+              (1 | refuge),
+            family = "zero_inflated_beta",
+            data = dplyr::filter(tbi_model_data, pa_tr == "no"),
+            cores = 4,
+            iter = 5000,
+            control = list(adapt_delta = 0.99))
 
+  m2 <- brm(mvbind(b_stnd, c_stnd) ~
+              aquatic_plant_area_m2 +
+              gauge_start_m5 +
+              gauge_start_diff +
+              dist_village +
+              rf_area_connected_in_wet_season_ha +
+              # no_inlet_outlet +
+              type_inlet_outlet +
+              lwb_area_wet_ha +
+              (1 | year_s) +
+              (1 | refuge),
+            family = "zero_inflated_beta",
+            data = dplyr::filter(tbi_model_data, pa_tr == "yes"),
+            cores = 4,
+            iter = 5000,
+            control = list(adapt_delta = 0.99))
+
+  list(m1, m2)
 
 }
 
