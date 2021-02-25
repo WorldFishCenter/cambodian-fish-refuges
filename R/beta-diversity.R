@@ -257,7 +257,7 @@ get_tbi_model_data <- function(tbi, occasion_covariates_beta, refuge_covariates_
   tbi %>%
     left_join(refuge_covariates_beta) %>%
     left_join(occasion_covariates_beta) %>%
-    filter(comparison == "2 5" , !pa_tr) %>%
+    filter(comparison == "2 5") %>%
     mutate(across(c(where(is.numeric) & !b_stnd:year_s), scale),
            across(where(is.character), as.factor),
            across(where( ~ is.factor(.x) && "None" %in% levels(.x)), ~fct_relevel(., "None")),
