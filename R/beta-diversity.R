@@ -21,12 +21,17 @@ get_catch_full_info <- function(catch_info, occasion_covariates){
     arrange(year_s, refuge)
 }
 
-
 get_change_matrices <- function(catch_full){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+  })
+
   catch_full %>%
     split(.$month) %>%
     map(~select(., -(year_s:refuge))) %>%
-    map(as.matrix)
+    map(as.matrix) %>%
+    map(log1p)
 }
 
 calculate_tbi <- function(change_matrices, catch_full){
