@@ -2,6 +2,8 @@
 
 library(magrittr)
 library(drake)
+library(ggplot2)
+library(ggtext)
 
 # load functions
 f <- lapply(list.files(path = here::here("R"), full.names = TRUE,
@@ -70,7 +72,10 @@ figures_plan <- drake_plan(
                 width = 17/2, height = 2.4, units = "cm", dpi = 320)),
   tbi_factors_plot = plot_tbi_factors(tbi_model),
   target(ggsave("figures/fig-conditional-tbi.png", tbi_factors_plot,
-                width = 17, height = 5.2, units = "cm", dpi = 320))
+                width = 17, height = 5.2, units = "cm", dpi = 320)),
+  tbi_randomeffects_plot = plot_tbi_random_effects(model_tbi_abu_comp),
+  target(ggsave(file_out("figures/fig-tbi-random2.png"), tbi_randomeffects_plot,
+                width = 17, height = 17, units = "cm", dpi = 320))
 )
 
 full_plan <- rbind(script_variables,
