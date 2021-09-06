@@ -230,26 +230,26 @@ FactoInvestigate::Investigate(season_pca)
     ## -- detection of outliers (time spent : 0.07s) --
     ## 0 outlier(s) terminated 
     ## 
-    ## -- analysis of the inertia (time spent : 0.13s) --
+    ## -- analysis of the inertia (time spent : 0.1s) --
     ## 4 component(s) carrying information : total inertia of 60% 
     ## 
-    ## -- components description (time spent : 3.24s) --
+    ## -- components description (time spent : 2.21s) --
     ## plane 1:2 
     ## plane 3:4 
     ## 
-    ## -- classification (time spent : 5.16s) --
+    ## -- classification (time spent : 3.66s) --
     ## 3 clusters 
     ## 
-    ## -- annexes writing (time spent : 5.76s) --
+    ## -- annexes writing (time spent : 3.94s) --
     ## 
-    ## -- saving data (time spent : 6.27s) --
+    ## -- saving data (time spent : 4.35s) --
     ## 
-    ## -- outputs compilation (time spent : 6.27s) --
+    ## -- outputs compilation (time spent : 4.35s) --
 
 ![](seasonality_files/figure-gfm/unnamed-chunk-2-8.png)<!-- -->
 
     ## File path:  /home/rstudio/cambodian-fish-refuges/notebooks/Investigate.html 
-    ## -- task completed (time spent : 12.87s) --
+    ## -- task completed (time spent : 9.2s) --
     ## This interpretation of the results was carried out automatically, 
     ## it cannot match the quality of a personal interpretation
 
