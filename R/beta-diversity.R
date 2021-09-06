@@ -435,7 +435,7 @@ plot_species_groups_changes <- function(species_change_model, species_changes){
     library(ggtext)
   })
 
-  msc <- species_change_model$t_values
+  msc <- species_change_model$mean_diff
 
   labels <- tibble(
     x = 0, y = 0.1,
