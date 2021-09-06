@@ -82,5 +82,5 @@ full_plan <- rbind(script_variables,
 # Execute plan ------------------------------------------------------------
 
 if (!is.null(full_plan)) {
-  make(full_plan, lock_envir = F)
+  make(full_plan, lock_envir = F, seed = 0)
 }
