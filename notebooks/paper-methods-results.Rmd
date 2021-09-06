@@ -1,0 +1,139 @@
+---
+title: "Paper output"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width = 10, fig.height = 7, warning = F, message = F)
+library(ggplot2)
+library(magrittr)
+library(tidyverse)
+library(brms)
+library(ggdist)
+library(tidybayes)
+```
+
+## Results
+
+```{r}
+drake::loadd(model_tbi_abu_comp)
+
+h4 <- hypothesis(model_tbi_abu_comp, class = NULL,
+           hypothesis = c("b_bstnd_Intercept > b_cstnd_Intercept"))
+
+h4_c <- h4$hypothesis$Post.Prob %>% subtract(1, .) %>% format.pval(digits = 1, eps = 1/10000)
+
+newdata <- expand_grid(
+    pa_tr = c(F), 
+    category_name = unique(model_tbi_abu_comp$data$category_name)) %>%
+  mutate(Var2 = colnames(provideDimnames(rbind(1:nrow(.), 1))))
+
+mtbia_samples <- model_tbi_abu_comp %>%
+  posterior_epred(newdata,
+    re_formula = NA
+    ) %>%
+  as.data.frame.table() %>%
+  left_join(newdata) %>%
+  dplyr::rename(Estimate = Freq, sample = Var1) 
+
+
+est <- mtbia_samples %>%
+  mutate(across(c(category_name), snakecase::to_snake_case)) %>%
+  group_by(category_name, Var3) %>%
+  ggdist::median_qi(Estimate)  %>%
+  ungroup() %>%
+  split(.[[1]]) %>%
+  lapply(function(x) select(x, -1)) %>%
+  lapply(function(x) split(x, x[[1]]))
+
+random_eff_hypo <- hypothesis(model_tbi_abu_comp, "sd_cfr_name__d_Intercept > sd_year_s__d_Intercept", class = NULL)
+```
+
+- The mean total dissimilarity (measured using the percentage difference) ranged between  `r scales::percent(est$community_pond_within_agricultural_land_not_prone_to_flood$d$Estimate)` [`r scales::percent(est$community_pond_within_agricultural_land_not_prone_to_flood$d$.lower)`, `r scales::percent(est$community_pond_within_agricultural_land_not_prone_to_flood$d$.upper)`] for refuges in community ponds within agricultural land not prone to flooding and `r scales::percent(est$reservoir_for_irrigation_in_upland_area$d$Estimate)` [`r scales::percent(est$reservoir_for_irrigation_in_upland_area$d$.lower)`, `r scales::percent(est$reservoir_for_irrigation_in_upland_area$d$.upper)`] for refuges in reservoirs for irrigation (Figure 2, top panel).
+
+- When decomposing these dissimilarities into those due to losses and gains due to species abundances, we found that dissimilarity losses account for a larger amount than gains across all refuge categories (probability of direction, p.d., `r scales::number(h4$hypothesis$Post.Prob, accuracy = 0.01)`; Figure 2, mid and bottom panel). 
+
+- When looking at the random effects, we also found that there is no substantial difference between the variability ofdifferences between the beta-diversity index isappear to be larger across CFRs than across years
+
+
+```{r}
+drake::loadd(species_changes)
+drake::loadd(species_change_model)
+drake::loadd(catch_full)
+
+sig_changes_species <- species_changes %>%
+  mutate(p_value_perm_adjust = p.adjust(p_value_perm)) %>%
+  filter(p_value_perm_adjust <= 0.05)
+
+almost_sig_changes_species <- species_changes %>%
+  filter(p_value_perm <= 0.05)
+
+
+dry_season_sp <- catch_full %>%
+    pivot_longer(starts_with("sp"), names_to = "species", values_to = "count") %>%
+    filter(season == "dry") 
+
+sig_species_names <- sig_changes_species %>% 
+  magrittr::extract2("species_name") %>%
+  paste0("*", ., "*") %>%
+  glue::glue_collapse(sep = ", ", last = ", and ")
+
+msc <- species_change_model$mean_diff
+
+black_white_diff <- hypothesis(msc, "b_Intercept < b_species_type_simpleWhite", 
+                               class = NULL)
+grey_white_diff <- hypothesis(msc, "b_species_type_simpleGrey < b_species_type_simpleWhite", class = NULL)
+
+number_ci <- function(x, x_low, x_high, rfun = round, digits = 2){
+  paste0(rfun(x, digits), " [", rfun(x_low, digits), ", ", rfun(x_high, digits), "]")
+}
+
+estimate_plus_ci <- function(x){
+  h <- hypothesis(msc, paste(x, "= 0"), class = NULL)
+  number_ci(h$hypothesis$Estimate, h$hypothesis$CI.Lower, h$hypothesis$CI.Upper)
+}
+
+```
+
+
+- We found that out of the `r n_distinct(dry_season_sp$species)` species sampled during the dry season, `r nrow(sig_changes_species)` species showed significant (log) differences in their abundances; namely `r sig_species_names`.
+- Another `r nrow(almost_sig_changes_species) - nrow(sig_changes_species)` species showed important differences but were not considered significant at the 0.05 level after correcting for multiple testing.
+
+- When comparing different types of species, we found that, on average, black and grey fish species are more likely to experience losses in abundances than white fish species (p.d. `r round(black_white_diff$hypothesis$Post.Prob, 2)` and `r round(grey_white_diff$hypothesis$Post.Prob, 2)` respectively). Specifically, the average difference in log abundances per species between the end and the beginning of the dry season was `r estimate_plus_ci("b_Intercept")`, `r estimate_plus_ci("b_species_type_simpleGrey + b_Intercept")`, and `r estimate_plus_ci("b_species_type_simpleWhite + b_Intercept")` for black, grey, and white species respectively. 
+
+```{r}
+drake::loadd(tbi_model)
+
+tbi_model_ab <- tbi_model[[1]]
+
+r2_abu <- brms::bayes_R2(tbi_model_ab)
+
+r2_ci <- function(x){
+  number_ci(x["Estimate"], x["Q2.5"], x["Q97.5"])
+}
+
+cul_no_loss <- hypothesis(tbi_model_ab, "bstnd_type_inlet_outletCulvert < bstnd_Intercept")
+cul_earth_loss <- hypothesis(tbi_model_ab, "bstnd_type_inlet_outletCulvert < bstnd_type_inlet_outletEarth")
+cul_no_gain <- hypothesis(tbi_model_ab, "cstnd_type_inlet_outletCulvert > cstnd_Intercept")
+
+h_pd <- function(x, i = 1, rfun = round, digits = 2){
+  rfun(x$hypothesis$Post.Prob[i], digits)
+}
+
+area_crf_loss <- hypothesis(tbi_model_ab,"bstnd_lwb_area_wet_ha > 0")
+area_rice_loss <- hypothesis(tbi_model_ab, "bstnd_rf_area_connected_in_wet_season_ha < 0")
+depth_start_loss <- hypothesis(tbi_model_ab, "bstnd_gauge_start_m5 < 0")
+refuge_dist_gain <- hypothesis(tbi_model_ab, "cstnd_dist_village < 0")
+```
+
+- The model that explored covariates of beta-diversity had a R2 of `r r2_ci(r2_abu[1, ])` for the dissimilarity in per-species abundance due to losses and `r r2_ci(r2_abu[2, ])` for the dissimilarity due to gains.
+
+- Specifically, CFRs connected to the adjacent rice fields through culverts were likely to experience lower losses of species abundance during the dry season particularly when compared to CFRs without channels or those with earth channels (p.d. `r h_pd(cul_no_loss)` and `r h_pd(cul_earth_loss)`; Figure 4A)
+
+- Similarly, CFRs with culverts experienced larger gains in species abundances when compared to CFRs without channels (p.d. `r h_pd(cul_no_gain, digits = 3)`). 
+
+- We found that the (log) area of the CFR water body had a positive association with the dissimilarities due to losses in species abundance (p.d. `r h_pd(area_crf_loss)`; Figure 4B).
+
+- In contrast, the rice-field area connected to the refuge during the wet season had a negative association to losses (p.d. `r h_pd(area_rice_loss)`; Figure 4C). 
+
+- However, the effect size and the likelihood of these associations is considerably smaller (p.d. `r h_pd(depth_start_loss)` and `r h_pd(refuge_dist_gain)` respectively).
