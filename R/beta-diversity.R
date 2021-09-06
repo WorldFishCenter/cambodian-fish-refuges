@@ -350,19 +350,23 @@ model_species_changes <- function(species_changes){
 
 }
 
-shorten_category_name <- function(category_name){
-  case_when(
+shorten_category_name <- function(category_name, extra = FALSE){
+  short_name <- case_when(
     category_name ==
       "Reservoir for irrigation in upland area" ~
-      "Irrigation reservoir",
+      "(1) Irrigation reservoir",
     category_name ==
       "Community pond within agricultural land not prone to flood" ~
-      "Not-flooding pond",
+      "(2) Not-flooding pond",
     category_name ==
       "Community pond within agricultural land prone to flood" ~
-      "Flooding pond",
+      "(3) Flooding pond",
     category_name ==
-      "Demarcated area in larger water body" ~ "Large water body")
+      "Demarcated area in larger water body" ~ "(4) Large water body")
+
+  if (extra) short_name <- stringr::str_extract(short_name, "[1-4]")
+
+  short_name
 }
 
 lengthen_difference_type <- function(.category){
