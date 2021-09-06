@@ -423,7 +423,104 @@ plot_tbi_category <- function(model_tbi_abu_comp){
           axis.title = element_text(size = 7),
           strip.text = element_markdown()) +
     labs(x = "Mean % difference")
- }
+}
+
+plot_tbi_random_effects <- function(model_tbi_abu_comp){
+
+  suppressPackageStartupMessages({
+    library(tidyverse)
+    library(tidybayes)
+    library(ggdist)
+    library(ggtext)
+    library(brms)
+  })
+
+  # mtbia_samples <- model_tbi_abu_comp %>%
+  #   ranef(summary = F) %>%
+  #   purrr::map_dfr(as.data.frame.table, .id = "ranef")
+
+  newdata_cfr_name <- model_tbi_abu_comp$data %>%
+    filter(pa_tr == FALSE) %>%
+    select(pa_tr, category_name, cfr_name) %>%
+    distinct()
+
+  mtbia_samples_cfr_name <- newdata_cfr_name %>%
+    add_fitted_draws(model_tbi_abu_comp,
+                    re_formula = ~ (1 | cfr_name)) %>%
+    rename(level = cfr_name)
+
+  points_plot_params <- function(x) {
+    x +
+      stat_pointinterval(.width = c(.66, .95),
+                         point_size = 1,
+                         interval_size_domain = c(0.5,12),
+                         interval_size_range = c(0.25, 1),
+                         position = position_dodge(width = 1),
+                         point_interval = mean_qi) +
+      scale_x_continuous(labels = scales::percent_format()) +
+      scale_color_manual(values = c("black", "#1f78b4", "#33a02c"), aesthetics = c("colour", "fill")) +
+      scale_shape_manual(values = c(16, 17, 15)) +
+      facet_grid(cols = vars(.category), rows = vars(category_name),
+                 scales = "free", space = "free") +
+      coord_cartesian(xlim = c(0,1)) +
+      theme_minimal(base_size = 8) +
+      theme(axis.title.y = element_blank(),
+            # panel.grid.major.y = element_blank(),
+            legend.position = "none",
+            legend.title = element_blank(),
+            axis.title = element_text(size = 7),
+            strip.text.y = element_markdown(),
+            strip.text.x = element_markdown()) +
+      labs(x = "Mean % difference")
+  }
+
+  refuge_plot <- mtbia_samples_cfr_name %>%
+    ungroup() %>%
+    mutate(.category = lengthen_difference_type(.category),
+           .category = str_wrap(.category, 31),
+           .category = str_replace(.category, "\\n", "<br />"),
+           level = fct_reorder(level, .value, .fun = mean),
+           category_name = shorten_category_name(category_name),
+           category_name = str_wrap(category_name, 16),
+           category_name = str_replace(category_name, "\\n", "<br />"),
+           category_name = fct_reorder(category_name, .value, .fun = mean)) %>%
+    ggplot(aes(x = .value, y = level, colour = .category, shape = .category)) %>%
+    points_plot_params() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank())
+
+  newdata_year <- model_tbi_abu_comp$data %>%
+    filter(pa_tr == FALSE) %>%
+    select(pa_tr, category_name, year_s) %>%
+    distinct()
+
+  mtbia_samples_year <- newdata_year %>%
+    add_fitted_draws(model_tbi_abu_comp,
+                     re_formula = ~ (1 | year_s)) %>%
+    mutate(year_s = round(year_s))
+
+  year_plot <- mtbia_samples_year %>%
+    ungroup() %>%
+    mutate(.category = lengthen_difference_type(.category),
+           .category = str_wrap(.category, 31),
+           .category = str_replace(.category, "\\n", "<br />"),
+           year = str_replace_all(year_s,
+                                  c("^0$" = "2013",
+                                    "^1$" = "2014",
+                                    "^2$" = "2015")),
+           category_name = shorten_category_name(category_name, TRUE),
+           category_name = str_wrap(category_name, 10),
+           category_name = str_replace(category_name, "\\n", "<br />"),
+           category_name = fct_reorder(category_name, .value, .fun = mean)) %>%
+    ggplot(aes(x = .value, y = year, colour = .category, shape = .category)) %>%
+    points_plot_params() +
+    theme(strip.text.x = element_blank())
+
+  library(patchwork)
+
+  refuge_plot + year_plot + plot_layout(ncol = 1, heights = c(3.2,1))
+
+}
 
 
 plot_species_groups_changes <- function(species_change_model, species_changes){
