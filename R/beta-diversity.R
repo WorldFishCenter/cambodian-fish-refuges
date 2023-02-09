@@ -8,7 +8,7 @@ get_catch_full_info <- function(catch_info, occasion_covariates){
                 names_from = "species",
                 values_from = "no_fish") %>%
     # fill un-sampled species to zero
-    mutate(across(where(is_numeric), tidyr::replace_na, replace = 0)) %>%
+    mutate(across(where(is.numeric), tidyr::replace_na, replace = 0)) %>%
     # Only Gill net
     filter(gear == "GN") %>%
     left_join(occasion_covariates) %>%
