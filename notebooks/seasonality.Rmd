@@ -70,10 +70,10 @@ pca_analysis <- occasion_info %>%
   dplyr::select(refuge, occasion, rf_water_level) %>%
   dplyr::mutate(rf_water_level = log(rf_water_level + 1)) %>%
   tidyr::pivot_wider(id_cols = "refuge", values_from = "rf_water_level", names_from = "occasion") %>% 
-  dplyr::mutate(dplyr::across(dplyr::everything(), tidyr::replace_na, 0)) %>% 
-  dplyr::left_join(ri, , by = "refuge") %>% 
-  as.data.frame() %>%
-  magrittr::set_rownames(.$refuge) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric),  tidyr::replace_na, 0)) %>% 
+  dplyr::left_join(ri) %>% 
+  #as.data.frame() %>%
+  #magrittr::set_rownames(.$refuge) %>%
   dplyr::select(-refuge) %>% 
   FactoMineR::PCA(quali.sup = 14:17, quanti.sup = 18:23, graph = F)
 
