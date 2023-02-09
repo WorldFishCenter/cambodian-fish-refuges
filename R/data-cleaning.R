@@ -17,8 +17,8 @@ clean_community_data <- function(community_data_raw, species_to_exclude){
   community_data_raw %>%
     janitor::clean_names() %>%
     # category_seems to be a bit weird
-    dplyr::select(-category) %>%
-    dplyr::rename(category = category_1) %>%
+    #dplyr::select(-category) %>%
+    #dplyr::rename(category = category_1) %>%
     # Funny column names
     dplyr::rename(fia_designated = fi_a_designated,
                   large_water_body = large_wb_yes_1_no_2,
