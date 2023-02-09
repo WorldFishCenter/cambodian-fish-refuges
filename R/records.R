@@ -2,7 +2,8 @@
 
 get_records <- function(fish_data_raw){
   fish_data_raw %>%
-    dplyr::select(, crf_id, no, rec_id, replicate_no, occasion, gear, ) %>%
+    #dplyr::select(, crf_id, no, rec_id, replicate_no, occasion, gear, ) %>%
+    dplyr::select(crf_id, no, rec_id, replicate_no, occasion, gear) %>%
     dplyr::rename(refuge = crf_id,
                   sampling = no,
                   replicate = replicate_no) %>%
