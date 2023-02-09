@@ -39,7 +39,7 @@ catch_wide <- catch_standard %>%
               names_from = "species", 
               values_from = "no_fish") %>%
   # fill un-sampled species to zero
-  mutate(across(where(is_numeric), tidyr::replace_na, replace = 0)) %>%
+  mutate(across(where(is.numeric), tidyr::replace_na, replace = 0)) %>%
   select(!starts_with("sp"), starts_with("sp")) %>%
   # Only Gill net 
   filter(gear == "GN")
