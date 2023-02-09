@@ -106,7 +106,7 @@ catch_gn_ca$row$coord %>%
 
 We will now group species by type to see if that simplifies things. But no... There seems to be a bit of a thing with category 1 sites (Reservoir for irrigation in upland area) which seem to have a higer proportion of grey species than the other categories. 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 catch_type_gn_wide <- catch_gn_wide %>%
   pivot_longer(starts_with("sp"), names_to = "species", values_to = "n") %>%
   left_join(select(species_info, species, type), by = "species") %>%

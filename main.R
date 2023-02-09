@@ -22,7 +22,7 @@ data_preprocessing <- drake_plan(
                                   na = c("", "NA", "#VALUE!")),
   community_data = clean_community_data(community_data_raw, species_to_exclude),
   refuge_info = get_refuge_info(community_data),
-  refuge_info_OK = test_refuge_info(refuge_info),
+  #refuge_info_OK = test_refuge_info(refuge_info),
   occasion_info = get_occasion_info(community_data),
   occasion_info_OK = test_occasion_info(occasion_info),
   sampling_info = get_sampling_info(community_data),

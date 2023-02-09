@@ -184,7 +184,7 @@ The model with mechanistic variables show some significant relationships but the
 If we use models like this in the actual paper we should focus on the categorical model and explain how environmental co-variates change across seasons. 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 diversity_wide <- diversity_cov %>%
   mutate(year_s = (as.numeric(substr(occasion, 3, 4))-1) %/% 4, 
          month_s = paste0("m_", month)) %>% 
