@@ -42,7 +42,7 @@ catch_wide <- catch_standard %>%
               names_from = "species", 
               values_from = "no_fish") %>%
   # fill un-sampled species to zero
-  mutate(across(where(is_numeric), tidyr::replace_na, replace = 0),
+  mutate(across(where(is.numeric), tidyr::replace_na, replace = 0),
          across(where(is.numeric), log1p)) %>%
   left_join(select(refuge_info, refuge, category), by = "refuge") %>%
   left_join(occasion_cov, by = "occasion") %>%
