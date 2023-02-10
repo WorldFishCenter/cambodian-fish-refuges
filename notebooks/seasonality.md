@@ -25,6 +25,9 @@ vars <- colnames(occasion_info)[5:16]
 purrr::map(vars, boxplot_occasion)
 ```
 
+    ## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+    ## ℹ Please use tidy evaluation ideoms with `aes()`
+
     ## [[1]]
 
 ![](seasonality_files/figure-gfm/season-boxplots-1.png)<!-- -->
@@ -47,9 +50,9 @@ purrr::map(vars, boxplot_occasion)
     ## 
     ## [[5]]
 
-    ## Warning: Removed 7 rows containing non-finite values (stat_boxplot).
+    ## Warning: Removed 7 rows containing non-finite values (`stat_boxplot()`).
 
-    ## Warning: Removed 7 rows containing missing values (geom_point).
+    ## Warning: Removed 7 rows containing missing values (`geom_point()`).
 
 ![](seasonality_files/figure-gfm/season-boxplots-5.png)<!-- -->
 
@@ -81,9 +84,9 @@ purrr::map(vars, boxplot_occasion)
     ## 
     ## [[11]]
 
-    ## Warning: Removed 1 rows containing non-finite values (stat_boxplot).
+    ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+    ## Warning: Removed 1 rows containing missing values (`geom_point()`).
 
 ![](seasonality_files/figure-gfm/season-boxplots-11.png)<!-- -->
 
@@ -114,6 +117,10 @@ occasion_info %>%
         axis.text.x = element_text(angle = 90))
 ```
 
+    ## Warning in dplyr::left_join(., refuge_info, by = "refuge"): Each row in `x` is expected to match at most 1 row in `y`.
+    ## ℹ Row 1 of `x` matches multiple rows.
+    ## ℹ If multiple matches are expected, set `multiple = "all"` to silence this warning.
+
 ![](seasonality_files/figure-gfm/water-level-1.png)<!-- -->
 
 We can see there is a lot of variation in the flooding patterns. Many
@@ -138,13 +145,21 @@ pca_analysis <- occasion_info %>%
   dplyr::select(refuge, occasion, rf_water_level) %>%
   dplyr::mutate(rf_water_level = log(rf_water_level + 1)) %>%
   tidyr::pivot_wider(id_cols = "refuge", values_from = "rf_water_level", names_from = "occasion") %>% 
-  dplyr::mutate(dplyr::across(dplyr::everything(), tidyr::replace_na, 0)) %>% 
-  dplyr::left_join(ri, , by = "refuge") %>% 
-  as.data.frame() %>%
-  magrittr::set_rownames(.$refuge) %>%
+  dplyr::mutate(dplyr::across(where(is.numeric),  tidyr::replace_na, 0)) %>% 
+  dplyr::left_join(ri) %>% 
+  #as.data.frame() %>%
+  #magrittr::set_rownames(.$refuge) %>%
   dplyr::select(-refuge) %>% 
   FactoMineR::PCA(quali.sup = 14:17, quanti.sup = 18:23, graph = F)
+```
 
+    ## Joining with `by = join_by(refuge)`
+
+    ## Warning in dplyr::left_join(., ri): Each row in `x` is expected to match at most 1 row in `y`.
+    ## ℹ Row 1 of `x` matches multiple rows.
+    ## ℹ If multiple matches are expected, set `multiple = "all"` to silence this warning.
+
+``` r
 factoextra::fviz_pca_ind(pca_analysis, habillage = "category_name", addEllipses = T)
 ```
 
@@ -184,9 +199,8 @@ season_pca <- occasion_info %>%
   FactoMineR::PCA(quali.sup = 1:4)
 ```
 
-    ## Warning in FactoMineR::PCA(., quali.sup = 1:4): Missing values are imputed by
-    ## the mean of the variable: you should use the imputePCA function of the missMDA
-    ## package
+    ## Warning in FactoMineR::PCA(., quali.sup = 1:4): Missing values are imputed by the mean of the
+    ## variable: you should use the imputePCA function of the missMDA package
 
 ![](seasonality_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->![](seasonality_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
@@ -227,34 +241,39 @@ FactoInvestigate::Investigate(season_pca)
 
     ## -- creation of the .Rmd file (time spent : 0s) --
     ## 
-    ## -- detection of outliers (time spent : 0.07s) --
+    ## -- detection of outliers (time spent : 0s) --
     ## 0 outlier(s) terminated 
     ## 
-    ## -- analysis of the inertia (time spent : 0.1s) --
+    ## -- analysis of the inertia (time spent : 0.01s) --
     ## 4 component(s) carrying information : total inertia of 60% 
     ## 
-    ## -- components description (time spent : 2.21s) --
+    ## -- components description (time spent : 3.36s) --
     ## plane 1:2 
     ## plane 3:4 
     ## 
-    ## -- classification (time spent : 3.66s) --
+    ## -- classification (time spent : 3.47s) --
     ## 3 clusters 
     ## 
-    ## -- annexes writing (time spent : 3.94s) --
+    ## -- annexes writing (time spent : 3.53s) --
     ## 
-    ## -- saving data (time spent : 4.35s) --
+    ## -- saving data (time spent : 3.66s) --
     ## 
-    ## -- outputs compilation (time spent : 4.35s) --
+    ## -- outputs compilation (time spent : 3.66s) --
+
+    ## Warning: ggrepel: 11 unlabeled data points (too many overlaps). Consider increasing
+    ## max.overlaps
+
+    ## Warning: ggrepel: 13 unlabeled data points (too many overlaps). Consider increasing
+    ## max.overlaps
 
 ![](seasonality_files/figure-gfm/unnamed-chunk-2-8.png)<!-- -->
 
-    ## File path:  /home/rstudio/cambodian-fish-refuges/notebooks/Investigate.html 
-    ## -- task completed (time spent : 9.2s) --
+    ## -- task completed (time spent : 8.06s) --
     ## This interpretation of the results was carried out automatically, 
     ## it cannot match the quality of a personal interpretation
 
 Looks like we can focus on a few variables only: aquatic plant area,
-gauge\_start, water\_temp, phosphate and brush\_park
+gauge_start, water_temp, phosphate and brush_park
 
 ## Now comparing variables from the dry season alone
 

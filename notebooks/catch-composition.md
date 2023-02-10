@@ -39,6 +39,9 @@ species_totals %>%
        caption = "* Only fish sampled with gill nets are shown")
 ```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+
 ![](catch-composition_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
@@ -71,11 +74,11 @@ species_totals %>%
 
 From the graphs above we can learn that
 
-  - Species richness and catch tends to be higher in the second sampling
-    of the wet season and lower otherwise. This indicates that in
-    further analysis, wet and dry season shouldn’t be grouped together
-    but one must distinguish between each of the four samplings.
-  - \-Grey’ species appear to be the most important group of species
-    throughout the study, particularly in terms of abundance. ‘Black’
-    and ‘Other’ species are overwhelmingly important in terms of biomass
-    relative to their abundance.
+- Species richness and catch tends to be higher in the second sampling
+  of the wet season and lower otherwise. This indicates that in further
+  analysis, wet and dry season shouldn’t be grouped together but one
+  must distinguish between each of the four samplings.
+- -Grey’ species appear to be the most important group of species
+  throughout the study, particularly in terms of abundance. ‘Black’ and
+  ‘Other’ species are overwhelmingly important in terms of biomass
+  relative to their abundance.

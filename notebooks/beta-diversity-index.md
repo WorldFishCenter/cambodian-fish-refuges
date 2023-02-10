@@ -31,7 +31,7 @@ catch_wide <- catch_standard %>%
               names_from = "species", 
               values_from = "no_fish") %>%
   # fill un-sampled species to zero
-  mutate(across(where(is_numeric), tidyr::replace_na, replace = 0)) %>%
+  mutate(across(where(is.numeric), tidyr::replace_na, replace = 0)) %>%
   select(!starts_with("sp"), starts_with("sp")) %>%
   # Only Gill net 
   filter(gear == "GN")
@@ -159,7 +159,7 @@ sp_tbi <- change_matrices %$%
     ## 
     ## 6 species not tested because t.stat = 0. See 'No_test' output list
 
-    ## Joining, by = "species"
+    ## Joining with `by = join_by(species)`
 
 ``` r
 sp_tbi_df <- sp_tbi %>%

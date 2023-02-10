@@ -71,15 +71,11 @@ factoextra::fviz_pca_ind(refuge_pca, geom = "point", habillage = "category_name"
 factoextra::fviz_pca_ind(refuge_pca, geom = "point", habillage = "channel_type", addEllipses = T, axes = 3:4)
 ```
 
-    ## Too few points to calculate an ellipse
-
 ![](refuge-info_files/figure-gfm/unnamed-chunk-3-5.png)<!-- -->
 
 ``` r
 factoextra::fviz_pca_ind(refuge_pca, geom = "point", habillage = "type_inlet_outlet", addEllipses = T, axes = 3:4)
 ```
-
-    ## Too few points to calculate an ellipse
 
 ![](refuge-info_files/figure-gfm/unnamed-chunk-3-6.png)<!-- -->
 
@@ -89,10 +85,9 @@ factoextra::fviz_pca_ind(refuge_pca, geom = "point", habillage = "category_name"
 
 ![](refuge-info_files/figure-gfm/unnamed-chunk-3-7.png)<!-- -->
 
-Looks like lwb\_depth\_dry\_m and lwb\_area\_wet\_ha are almost
-orthogonal and are highly correlated with axis 1 and 2. For axis 3 and 4
-looks like we can use some more: no\_channel,
-rf\_area\_connected\_in\_dry\_season\_ha. We’ll probably add
-dist\_village and dist\_market because they are interesting. The only
-categorical variable that seems to be strongly correlated with these
-categorical ones is channel\_type.
+Looks like lwb_depth_dry_m and lwb_area_wet_ha are almost orthogonal and
+are highly correlated with axis 1 and 2. For axis 3 and 4 looks like we
+can use some more: no_channel, rf_area_connected_in_dry_season_ha. We’ll
+probably add dist_village and dist_market because they are interesting.
+The only categorical variable that seems to be strongly correlated with
+these categorical ones is channel_type.

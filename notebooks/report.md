@@ -11,35 +11,35 @@ season refuges in the landscape to mix.
 
 ### Methods
 
-  - Selected only surveys performed with gill net which were performed
-    across all seasons
-  - Added number of individuals across replicates within a sampling
-    occasion together
-  - Calculated the Shannon diversity index of (log) species abundance
-    for each refuge and occasion
-  - Used a Bayesian test to compare diversity across the year. We
-    included year and the refuge identity nested inside refuge type as
-    random effects. For year we calculated a random intercept and also
-    allowed month estimates to vary across years. To account for uneven
-    sampling in smaller sites we included the (log) number of replicates
-    in each sampling occasion an offset.
-  - Tested the hypotheses comparing diversity across the year and across
-    different refuge category types.
+- Selected only surveys performed with gill net which were performed
+  across all seasons
+- Added number of individuals across replicates within a sampling
+  occasion together
+- Calculated the Shannon diversity index of (log) species abundance for
+  each refuge and occasion
+- Used a Bayesian test to compare diversity across the year. We included
+  year and the refuge identity nested inside refuge type as random
+  effects. For year we calculated a random intercept and also allowed
+  month estimates to vary across years. To account for uneven sampling
+  in smaller sites we included the (log) number of replicates in each
+  sampling occasion an offset.
+- Tested the hypotheses comparing diversity across the year and across
+  different refuge category types.
 
 ### Results
 
-  - The R<sup>2</sup> of our model was between 0.49 and 0.57 (95%
-    probability) which indicates that the model was able to account for
-    a substantial proportion of the variation in alpha diversity.
-  - We found that the alpha diversity in November, at the end of the wet
-    season was very likely higher than the diversity in August (at the
-    beginning of the wet season; *p* = 0.02). Diversity in November was
-    also likely to be higher than the diversity during the dry season
-    but the difference was not significant at the *α* = 0.05 level (*p*
-    = 0.20 for February and *p* = 0.06 for May).
-  - Similarly, we found that alpha diversity in May was likely to be
-    smaller than the diversity in February but the difference was not
-    significant at the 0.05 level (*p* = 0.11).
+- The R<sup>2</sup> of our model was between 0.56 and 0.58 (95%
+  probability) which indicates that the model was able to account for a
+  substantial proportion of the variation in alpha diversity.
+- We found that the alpha diversity in November, at the end of the wet
+  season was very likely higher than the diversity in August (at the
+  beginning of the wet season; *p* = 0.02). Diversity in November was
+  also likely to be higher than the diversity during the dry season but
+  the difference was not significant at the *α* = 0.05 level (*p* = 0.20
+  for February and *p* = 0.07 for May).
+- Similarly, we found that alpha diversity in May was likely to be
+  smaller than the diversity in February but the difference was not
+  significant at the 0.05 level (*p* = 0.17).
 
 ![](report_files/figure-gfm/diversity-over-year-1.png)<!-- -->
 
@@ -49,17 +49,17 @@ the median of the distribution and lines indicate the 66 and 95%
 credible intervals. Shannon diversity values have been standardised for
 eight replicates for each sampling occasion.*
 
-  - When looking at the random effects, we found that the variability in
-    alpha diversity across refuges was very likely (with a 95%
-    probability) to be between 2 and 7 times larger than the variability
-    across year and between 2 and 7 times larger than the variability
-    across refuge categories.
-  - The data does not suggest that there are important differences among
-    refuge classes. Nevertheless there is substantial evidence (82%
-    likelihood) that mean diversity in refuges that consist in a
-    demarcated area in a larger water body with perennial fishing is
-    slightly smaller than diversity in community ponds within
-    agricultural land prone to flood.
+- When looking at the random effects, we found that the variability in
+  alpha diversity across refuges was very likely (with a 95%
+  probability) to be between 2 and 4 times larger than the variability
+  across year and between 2 and 7 times larger than the variability
+  across refuge categories.
+- The data does not suggest that there are important differences among
+  refuge classes. Nevertheless there is substantial evidence (82%
+  likelihood) that mean diversity in refuges that consist in a
+  demarcated area in a larger water body with perennial fishing is
+  slightly smaller than diversity in community ponds within agricultural
+  land prone to flood.
 
 ## Question 2
 
@@ -68,34 +68,33 @@ diversity in the wet season?
 
 ### Methods
 
-  - Calculated the Shannon diversity index of (log) species abundance
-    for each refuge and occasion as above.
-  - Used a Bayesian regression to test whether the Shannon diversity
-    index at the end of the dry season (May) is related to the diversity
-    at the beginning of the wet season (August). As in the previous
-    model, we included year and the refuge identity nested inside refuge
-    type as random effects. For year we calculated a random intercept
-    and for refuge and refuge-category we calculated random slopes and
-    intercept. To account for uneven sampling in smaller sites we
-    included the (log) number of replicates in each sampling occasion an
-    offset.
-  - Used data from 2013, 2014, and 2015 for which we had samples both
-    during the dry and the wet season and removed occasions in which the
-    refuge was completely dry and therefore the Shannon diversity index
-    in May was zero.
+- Calculated the Shannon diversity index of (log) species abundance for
+  each refuge and occasion as above.
+- Used a Bayesian regression to test whether the Shannon diversity index
+  at the end of the dry season (May) is related to the diversity at the
+  beginning of the wet season (August). As in the previous model, we
+  included year and the refuge identity nested inside refuge type as
+  random effects. For year we calculated a random intercept and for
+  refuge and refuge-category we calculated random slopes and intercept.
+  To account for uneven sampling in smaller sites we included the (log)
+  number of replicates in each sampling occasion an offset.
+- Used data from 2013, 2014, and 2015 for which we had samples both
+  during the dry and the wet season and removed occasions in which the
+  refuge was completely dry and therefore the Shannon diversity index in
+  May was zero.
 
 ### Results
 
-  - The R<sup>2</sup> of the model was between 0.42 and 0.64 (95%
-    probability) which indicates that the model was able to account for
-    a substantial proportion of the variation in alpha diversity.
-  - We found that there is almost certain that there is a positive
-    association between the Shannon diversity index in May, at the end
-    of the dry season, and the index in August, at the beginning of the
-    wet season (*p* = 0.009).
-  - This relationship between May’s and August’s diversity was
-    maintained across years, refuge types, and even individual refuges
-    (Supp. Figure 2).
+- The R<sup>2</sup> of the model was between 0.87 and 0.88 (95%
+  probability) which indicates that the model was able to account for a
+  substantial proportion of the variation in alpha diversity.
+- We found that there is almost certain that there is a positive
+  association between the Shannon diversity index in May, at the end of
+  the dry season, and the index in August, at the beginning of the wet
+  season (*p* = 0.03).
+- This relationship between May’s and August’s diversity was maintained
+  across years, refuge types, and even individual refuges (Supp. Figure
+  2).
 
 ![](report_files/figure-gfm/drywet-relationship-1.png)<!-- -->
 
@@ -111,51 +110,51 @@ factors that explain the differences?
 
 ### Methods
 
-  - Added number of individuals for each species across replicates
-    within a sampling occasion together.
-  - Standardised the number of individuals counted in order to directly
-    compare sites with differing number of replicates.
-  - Calculated temporal beta-diversity index (TBI) between the
-    sites-species matrix in February and May for each of the three years
-    when sampling occurred.
-  - We calculated two TBI versions one that account for presence/absence
-    of species and another that also account for species abundance.
-  - Used a Bayesian test to compare the mean TBI for these two versions.
-    Specifically we used a multivariate framework in which the response
-    variables were the dissimilarities due to gains and those due to
-    losses. We calculated a random intercept for year and random
-    intercepts for refuge and refuge type. Differences were modelled
-    using a Beta distribution.
-  - Performed multiple paired t-tests for the differences in abundances
-    observed in February and May. We discarded species that do not
-    differ in the date prior to calculation. Used 9999 permutations to
-    calculate the p-values. We corrected permutation p-values for
-    multiple testing using the Holm method.
+- Added number of individuals for each species across replicates within
+  a sampling occasion together.
+- Standardised the number of individuals counted in order to directly
+  compare sites with differing number of replicates.
+- Calculated temporal beta-diversity index (TBI) between the
+  sites-species matrix in February and May for each of the three years
+  when sampling occurred.
+- We calculated two TBI versions one that account for presence/absence
+  of species and another that also account for species abundance.
+- Used a Bayesian test to compare the mean TBI for these two versions.
+  Specifically we used a multivariate framework in which the response
+  variables were the dissimilarities due to gains and those due to
+  losses. We calculated a random intercept for year and random
+  intercepts for refuge and refuge type. Differences were modelled using
+  a Beta distribution.
+- Performed multiple paired t-tests for the differences in abundances
+  observed in February and May. We discarded species that do not differ
+  in the date prior to calculation. Used 9999 permutations to calculate
+  the p-values. We corrected permutation p-values for multiple testing
+  using the Holm method.
 
 ### Results
 
-  - Even though the diversity of the communities in February and March
-    is not significantly different (Question 2) the *composition* of the
-    communities in these months appears to be quite distinct. When using
-    abundance data, the mean community dissimilarity (measured as
-    percentage difference), which ranges between 0 (for two identical
-    communities) and 1 (for completely different communities), was 1.06
-    (0.78-1.41; 95% credible intervals).
-  - These dissimilarities were primarily driven by losses rather than
-    gains (*p* = 0.05). In fact, losses account for 67% (46%-82%) of the
-    total dissimilarity.
-  - We found that the dissimilarities are larger when using abundance
-    data were higher than when using occurrence data (*p* = 0.21).
-    Nevertheless, the dissimilarity when using occurrence data was still
-    substantial at 0.96 (0.68, 1.32). This indicates, that changes are
-    not only driven by a reduction in species abundances, but also by a
-    reduction in the species present in May compared to February.
-  - We found that only a handful species show consistent changes between
-    February and May across refuges and years. This is likely due to the
-    dramatic differences in community composition across refuges and
-    over time.
-  - However there were differences between species types. Black species
-    were more likely to be lost than grey and white species.
+- Even though the diversity of the communities in February and March is
+  not significantly different (Question 2) the *composition* of the
+  communities in these months appears to be quite distinct. When using
+  abundance data, the mean community dissimilarity (measured as
+  percentage difference), which ranges between 0 (for two identical
+  communities) and 1 (for completely different communities), was 1.06
+  (0.76-1.43; 95% credible intervals).
+- These dissimilarities were primarily driven by losses rather than
+  gains (*p* = 0.057). In fact, losses account for 68% (46%-83%) of the
+  total dissimilarity.
+- We found that the dissimilarities are larger when using abundance data
+  were higher than when using occurrence data (*p* = 0.004).
+  Nevertheless, the dissimilarity when using occurrence data was still
+  substantial at 0.96 (0.67, 1.33). This indicates, that changes are not
+  only driven by a reduction in species abundances, but also by a
+  reduction in the species present in May compared to February.
+- We found that only a handful species show consistent changes between
+  February and May across refuges and years. This is likely due to the
+  dramatic differences in community composition across refuges and over
+  time.
+- However there were differences between species types. Black species
+  were more likely to be lost than grey and white species.
 
 ![](report_files/figure-gfm/tbi-plot-1.png)<!-- -->
 
@@ -166,10 +165,10 @@ by dissimilarities due to species gains and species losses. (b) By the
 end of the dry season, “black” species are more likely to encounter
 losses than “grey” and “white” species.*
 
-  - We found that channel shape of the ponds and type of channels and
-    inlets were associated with the gains and losses of species during
-    the dry season.
-  - Large water bodies were mode likely to loose species.
+- We found that channel shape of the ponds and type of channels and
+  inlets were associated with the gains and losses of species during the
+  dry season.
+- Large water bodies were mode likely to loose species.
 
 ![](report_files/figure-gfm/tbi-factors-plot-1.png)<!-- -->
 

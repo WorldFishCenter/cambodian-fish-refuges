@@ -2,8 +2,8 @@ Sampling bias
 ================
 
 The first step on the analysis is a better understanding of the data.
-We’re particularly interested on knowing whether we should include
-data from all gears and whether there are particular considerations when
+We’re particularly interested on knowing whether we should include data
+from all gears and whether there are particular considerations when
 analysing one gear or another.
 
 We start by loading the catch data:
@@ -71,24 +71,23 @@ catch_info %>%
 
 We can see several patterns we would like to further investigate:
 
-  - Six sites have been consistently sampled five times (instead of 8).
-    These are the ones with id 12, 26, 28, 31, 32, and 35. After
-    checking the monitoring protocol it became apparent that these sites
-    correspond to the smallest refuges and therefore less samples were
-    performed.
-  - Data seems to be particularly patchy in occasion 3 (May 2013), but
-    the number of species appears to be generally lower in occasions
-    corresponding to May and August. These samplings correspond to the
-    dry season and lower catches are to be expected.
-  - No species were recorded for site 15 (Boeng Tramses) in occasion 2
-    and 3 (Feb and May 2013).
+- Six sites have been consistently sampled five times (instead of 8).
+  These are the ones with id 12, 26, 28, 31, 32, and 35. After checking
+  the monitoring protocol it became apparent that these sites correspond
+  to the smallest refuges and therefore less samples were performed.
+- Data seems to be particularly patchy in occasion 3 (May 2013), but the
+  number of species appears to be generally lower in occasions
+  corresponding to May and August. These samplings correspond to the dry
+  season and lower catches are to be expected.
+- No species were recorded for site 15 (Boeng Tramses) in occasion 2 and
+  3 (Feb and May 2013).
 
 ## Take aways
 
-  - Analyse only gill net data
-  - If feasible, correct for differences in sampling among areas. This
-    could potentially be done be done in a variety of ways depending on
-    the analysis performed: averaging (instead of adding) across
-    replicates, including a covariate of sampling in a statistical model
-    (refuge area or replicate number), or even just taking care when
-    interpreting the results from these sites.
+- Analyse only gill net data
+- If feasible, correct for differences in sampling among areas. This
+  could potentially be done be done in a variety of ways depending on
+  the analysis performed: averaging (instead of adding) across
+  replicates, including a covariate of sampling in a statistical model
+  (refuge area or replicate number), or even just taking care when
+  interpreting the results from these sites.

@@ -33,7 +33,7 @@ catch_wide <- catch_standard %>%
               names_from = "species", 
               values_from = "no_fish") %>%
   # fill un-sampled species to zero
-  mutate(across(where(is_numeric), tidyr::replace_na, replace = 0),
+  mutate(across(where(is.numeric), tidyr::replace_na, replace = 0),
          across(where(is.numeric), log1p)) %>%
   left_join(select(refuge_info, refuge, category), by = "refuge") %>%
   left_join(occasion_cov, by = "occasion") %>%
@@ -108,36 +108,3 @@ We will now group species by type to see if that simplifies things. But
 no… There seems to be a bit of a thing with category 1 sites (Reservoir
 for irrigation in upland area) which seem to have a higer proportion of
 grey species than the other categories.
-
-``` r
-catch_type_gn_wide <- catch_gn_wide %>%
-  pivot_longer(starts_with("sp"), names_to = "species", values_to = "n") %>%
-  left_join(select(species_info, species, type), by = "species") %>%
-  mutate(type = snakecase::to_snake_case(type), 
-         type = fct_lump_n(type, 3)) %>%
-  group_by(refuge, occasion, category, year, season, month, type) %>%
-  summarise(n = I(sum(n)), .groups = "drop") %>%
-  pivot_wider(names_from = "type", values_from = "n")
-
-catch_type_gn_ca <- catch_type_gn_wide %>%
-  select(-(1:6)) %>%
-  FactoMineR::CA(graph = FALSE)
-  
-factoextra::fviz_ca_row(catch_type_gn_ca, geom = "point", habillage = catch_gn_wide$category, addEllipses = T) +
-  scale_colour_viridis_d() 
-```
-
-![](correspondence-analysis_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-``` r
-factoextra::fviz_ca_row(catch_type_gn_ca, geom = "point", habillage = catch_gn_wide$season, addEllipses = T) +
-  scale_colour_viridis_d() 
-```
-
-![](correspondence-analysis_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
-
-``` r
-factoextra::fviz_ca_biplot(catch_type_gn_ca)
-```
-
-![](correspondence-analysis_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
