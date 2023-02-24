@@ -458,7 +458,7 @@ plot_tbi_random_effects <- function(model_tbi_abu_comp){
                          position = position_dodge(width = 1),
                          point_interval = mean_qi) +
       scale_x_continuous(labels = scales::percent_format()) +
-      scale_color_manual(values = c("black", "#1f78b4", "#33a02c"), aesthetics = c("colour", "fill")) +
+      scale_color_manual(values = c("black", "#33a02c", "#1f78b4"), aesthetics = c("colour", "fill")) +
       scale_shape_manual(values = c(16, 17, 15)) +
       facet_grid(cols = vars(.category), rows = vars(category_name),
                  scales = "free", space = "free") +
