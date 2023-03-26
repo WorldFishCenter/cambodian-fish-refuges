@@ -178,3 +178,21 @@ ggsave(plot_tbi, filename = "figures/fig_1.png", width = 17/2, height = 7, units
 ggsave(filename = "figures/fig_2.png", plot = plot_species_groups, width = 17/2, height = 2.3, units = "cm", dpi = 300)
 ```
 
+```{r}
+mod_dat <- model_tbi_abu_comp$data %>% dplyr::as_tibble() %>% dplyr::distinct()
+mod_res <- residuals(model_tbi_abu_comp) %>% dplyr::as_tibble() %>% dplyr::distinct()
+cfr_coords <- readr::read_csv("cfr_coords.csv") 
+
+test_df <-
+  dplyr::bind_cols(mod_dat, mod_res) %>%
+  dplyr::select(cfr_name, Estimate.bstnd) %>%
+  dplyr::left_join(cfr_coords)
+
+# Create a neighbor list based on the latitude and longitude coordinates
+coords <- cbind(test_df$long, test_df$lat)
+nb <- dnearneigh(coords, 0, 10)
+w <- nb2listw(nb)
+
+sa_test <- adespatial::moran.randtest(test_df$Estimate.bstnd, listw = w, nrepet = 999)
+sa_test
+```
